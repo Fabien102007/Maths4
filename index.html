@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1220"><title>Maths4 — Comprendre les mathématiques</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/math-logo.svg"><link rel="stylesheet" href="style.css?v=20261117-latex-flip2"></head>
-<body><aside class="sidebar" id="sidebar"><a class="brand" href="#"><span class="logo">∑</span><span><b>Maths4</b><small>COMPRENDRE · DÉMONTRER</small></span></a><nav><button class="nav active" data-view="home">⌂ <span>Vue d'ensemble</span></button><button class="nav" data-view="learn">▤ <span>Apprendre</span></button><button class="nav" data-view="exercises">✎ <span>Exercices</span></button><button class="nav" data-view="cards">◫ <span>Flashcards</span></button><button class="nav" data-view="reference">∴ <span>Référentiel</span></button><button class="nav" data-view="progress">◔ <span>Progression</span></button></nav><div class="side-foot">MATHS4 · VERSION 4.0<br><small>Progression sauvegardée sur cet appareil</small></div></aside>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101824"><title>Maths4 — Comprendre les mathématiques</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/math-logo.svg"><link rel="stylesheet" href="style.css?v=20261118-design-latex1"></head>
+<body><aside class="sidebar" id="sidebar"><a class="brand" href="#"><span class="logo"><img src="icons/math-logo.svg" alt="Logo Maths4"></span><span><b>Maths4</b><small>COMPRENDRE · DÉMONTRER</small></span></a><nav><button class="nav active" data-view="home">⌂ <span>Vue d'ensemble</span></button><button class="nav" data-view="learn">▤ <span>Apprendre</span></button><button class="nav" data-view="exercises">✎ <span>Exercices</span></button><button class="nav" data-view="cards">◫ <span>Flashcards</span></button><button class="nav" data-view="reference">∴ <span>Référentiel</span></button><button class="nav" data-view="progress">◔ <span>Progression</span></button></nav><div class="side-foot">MATHS4 · VERSION 4.0<br><small>Progression sauvegardée sur cet appareil</small></div></aside>
 <main><header class="topbar"><button id="menu" class="menu">☰</button><span>ESPACE MATHÉMATIQUES / <b id="crumb">VUE D'ENSEMBLE</b></span><span id="today"></span></header>
 <section class="view active" id="home"><div class="hero"><div><span class="eyebrow">APPRENDRE AVEC RIGUEUR</span><h1>Les maths ne se<br><em>mémorisent pas.</em><br>Elles se comprennent.</h1><p>Un espace pour construire des raisonnements solides, retenir l'essentiel et visualiser les concepts abstraits.</p><button class="primary" data-go="learn">Commencer à apprendre →</button></div><div class="hero-art"><div class="orbit"></div><strong>∫</strong><i>π</i><b>∞</b><small>THINK · PROVE · UNDERSTAND</small></div></div><div class="section-title"><div><span class="eyebrow">TON ESPACE</span><h2>Vue d'ensemble</h2></div><span class="muted">Un pas après l'autre.</span></div><div class="stats"><article><small>NOTIONS DISPONIBLES</small><strong id="sTopics">18</strong><span>Analyse et algèbre</span></article><article><small>CARTES À RÉVISER</small><strong id="sCards">24</strong><span>Définitions et théorèmes</span></article><article><small>NOTIONS MAÎTRISÉES</small><strong id="sMastered">0</strong><span>À construire progressivement</span></article><article><small>SÉANCES EFFECTUÉES</small><strong id="sSessions">0</strong><span>Sur cet appareil</span></article></div><div class="home-grid"><article class="panel"><span class="eyebrow">POUR PROGRESSER</span><h3>Reprendre là où tu veux</h3><div class="continue"><b>ƒ</b><div><strong>Analyse</strong><small>Limites, continuité, dérivation</small><div class="bar"><i id="analysisBar"></i></div></div><button data-go="learn">↗</button></div><div class="continue"><b class="purple">A</b><div><strong>Algèbre</strong><small>Applications linéaires, matrices, espaces vectoriels</small><div class="bar"><i id="algebraBar"></i></div></div><button data-go="learn">↗</button></div></article><article class="panel quote"><span>“</span><p>Une démonstration réussie est une idée juste, rendue inévitable par la rigueur.</p><small>LE BON RÉFLEXE</small></article></div></section>
 <section class="view" id="learn"><div class="intro"><span class="eyebrow">COURS & NOTIONS</span><h1>Apprendre avec méthode.</h1><p>Choisis une notion, comprends les définitions et propriétés, puis teste-toi.</p></div><div class="toolbar"><div class="filters" id="levels"><button class="filter active" data-level="Tous">Tout</button><button class="filter" data-level="L1">L1</button><button class="filter" data-level="L2">L2</button><button class="filter" data-level="MP">MP</button></div><input id="search" placeholder="Rechercher une notion…"></div><div id="topics" class="topic-grid"></div></section>
@@ -9,7 +9,7 @@
 <section class="view" id="cards"><div class="intro"><span class="eyebrow">MÉMORISATION ACTIVE</span><h1>Flashcards.</h1><p>Essaie de retrouver la réponse avant de retourner la carte.</p></div><div class="toolbar"><div class="filters"><button class="filter active" data-cat="Toutes">Toutes</button><button class="filter" data-cat="Analyse">Analyse</button><button class="filter" data-cat="Algèbre">Algèbre</button><button class="filter" id="dueToggle">À réviser</button></div><span id="cardCount" class="muted"></span></div><div class="flash-wrap"><button id="flash" class="flash"><small id="cardMeta">ANALYSE · L1</small><span id="cardSide">QUESTION</span><strong id="cardText">Qu'est-ce qu'une suite convergente ?</strong><small>CLIQUER POUR RETOURNER ↻</small></button><div class="actions"><button class="secondary" id="prev">← Précédente</button><button class="primary" id="flip">Voir la réponse ↻</button><button class="secondary" id="next">Suivante →</button></div><div class="ratings" id="ratings" hidden><span>Évalue ton rappel :</span><button data-rate="again">À revoir · 1 j</button><button data-rate="hard">Difficile</button><button data-rate="good">Bien</button><button data-rate="easy">Facile</button></div></div></section>
 <section class="view" id="reference"><div class="intro"><span class="eyebrow">BOÎTE À OUTILS</span><h1>Référentiel mathématique.</h1><p>Définitions et théorèmes essentiels à retrouver rapidement.</p></div><input id="refSearch" class="search-wide" placeholder="Rechercher une définition ou un théorème…"><div id="refs" class="ref-list"></div></section>
 <section class="view" id="progress"><div class="intro"><span class="eyebrow">RÉGULARITÉ & MAÎTRISE</span><h1>Ta progression.</h1><p>Construis des connaissances durables, sans chercher à aller vite.</p></div><div class="progress-grid"><article class="panel"><small>NOTIONS MAÎTRISÉES</small><div class="progress-number"><strong id="percent">0%</strong><span id="progressCount">0 notion sur 18</span></div><div class="bar big"><i id="progressBar"></i></div><p class="muted">Marque une notion comme maîtrisée après avoir su l'expliquer et résoudre un exercice sans aide.</p></article><article class="panel"><small>SÉANCES ENREGISTRÉES</small><strong class="big-number" id="sessions">0</strong><button class="secondary" id="addSession">+ Enregistrer une séance</button></article></div><div class="section-title"><h2>Révisions espacées</h2></div><div id="reviewSummary" class="review-summary"></div><div class="section-title"><h2>Suivi par notion</h2></div><div id="progressList" class="ref-list"></div><button id="reset" class="reset">Réinitialiser la progression locale</button></section>
-<footer>∑ MATHS2 <span>Comprendre · Démontrer · Maîtriser</span></footer></main><script>window.MathJax={tex:{inlineMath:[["\\(","\\)"],["$","$"]],displayMath:[["\\[","\\]"]],processEscapes:true},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]},startup:{typeset:false}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" onload="MathJax.typesetPromise().catch(function(e){console.error('MathJax',e)})"></script><script src="data.js?v=20261117-latex-flip2"></script><script src="app.js?v=20261117-latex-flip2"></script>
+<footer>∑ MATHS2 <span>Comprendre · Démontrer · Maîtriser</span></footer></main><script>window.MathJax={tex:{inlineMath:[["\\(","\\)"],["$","$"]],displayMath:[["\\[","\\]"]],processEscapes:true},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]},startup:{typeset:false}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" onload="MathJax.typesetPromise().catch(function(e){console.error('MathJax',e)})"></script><script src="data.js?v=20261118-design-latex1"></script><script src="app.js?v=20261118-design-latex1"></script>
 <script>
 /* Navigation de secours : le cours reste accessible même si un autre module JS échoue. */
 (()=>{
@@ -111,4 +111,76 @@
   if(typeof window.openMaths4Course==='function')window.openMaths4Course(id);else fallbackOpen(id);
  },true);
 })();
-</script></body></html>
+</script>
+<script>
+/* Rendu LaTeX des symboles mathématiques Unicode dans les contenus dynamiques.
+   Les données sources restent inchangées : seule leur présentation est transformée. */
+(()=>{
+ const symbols={
+  '∀':'\\forall','∃':'\\exists','∈':'\\in','∉':'\\notin','⊂':'\\subset','⊆':'\\subseteq',
+  '∩':'\\cap','∪':'\\cup','≤':'\\leq','≥':'\\geq','≠':'\\neq','≈':'\\approx','±':'\\pm',
+  '∞':'\\infty','∑':'\\sum','Σ':'\\sum','∫':'\\int','√':'\\sqrt{}','∂':'\\partial','∇':'\\nabla',
+  '→':'\\to','⇒':'\\Rightarrow','↔':'\\leftrightarrow','×':'\\times','÷':'\\div','·':'\\cdot',
+  '⋅':'\\cdot','−':'-','ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}',
+  'ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}','ε':'\\varepsilon','η':'\\eta','λ':'\\lambda',
+  'μ':'\\mu','π':'\\pi','θ':'\\theta','φ':'\\varphi','ω':'\\omega','α':'\\alpha',
+  'β':'\\beta','γ':'\\gamma','σ':'\\sigma','ρ':'\\rho','τ':'\\tau','Ω':'\\Omega',
+  '‖':'\\|','⟨':'\\langle','⟩':'\\rangle','′':"'",'″':"''"
+ };
+ const subs={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','ₙ':'n','ₖ':'k','ₘ':'m','ₐ':'a','ₓ':'x'};
+ const sups={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁺':'+','⁻':'-'};
+ const mathChar=/[∀∃∈∉⊂⊆∩∪≤≥≠≈±∞∑Σ∫√∂∇→⇒↔×÷·⋅−ℝℕℤℚℂεηλμπθφωαβγσρτΩ‖⟨⟩′″₀-₉ₙₖₘₐₓ⁰-⁹⁺⁻]/;
+ function texToken(token){
+  let out='';
+  for(let i=0;i<token.length;i++){
+   const c=token[i];
+   if(subs[c]!==undefined){out+='_{'+subs[c]+'}';continue;}
+   if(sups[c]!==undefined){out+='^{'+sups[c]+'}';continue;}
+   out+=symbols[c]||c;
+  }
+  return out;
+ }
+ function process(root){
+  if(!window.MathJax?.typesetPromise||!root)return;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
+   acceptNode(node){
+    const p=node.parentElement;
+    if(!p||p.closest('script,style,textarea,pre,code,button,.math-token,.MathJax,.MathJax_Preview,mjx-container'))return NodeFilter.FILTER_REJECT;
+    const s=node.nodeValue||'';
+    if(!s.trim()||s.includes('\\(')||s.includes('\\[')||s.includes('</html>
+))return NodeFilter.FILTER_REJECT;
+    return mathChar.test(s)||/[=<>]/.test(s)&&/[0-9]/.test(s)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+   }
+  });
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  const created=[];
+  for(const node of nodes){
+   const parts=(node.nodeValue||'').split(/(\s+)/);
+   const fragment=document.createDocumentFragment();
+   for(const part of parts){
+    if(!part){continue;}
+    if(/\s+/.test(part)){fragment.append(document.createTextNode(part));continue;}
+    if(mathChar.test(part)||(/[=<>]/.test(part)&&/[0-9]/.test(part))){
+     const span=document.createElement('span');span.className='math-token';span.textContent='\\('+texToken(part)+'\\)';fragment.append(span);created.push(span);
+    }else fragment.append(document.createTextNode(part));
+   }
+   node.parentNode?.replaceChild(fragment,node);
+  }
+  if(created.length)window.MathJax.typesetPromise(created).catch(err=>console.warn('MathJax:',err));
+ }
+ function start(){
+  process(document.querySelector('main'));
+  const observer=new MutationObserver(records=>{
+   for(const record of records){
+    for(const node of record.addedNodes){
+     if(node.nodeType===Node.ELEMENT_NODE)process(node);
+     else if(node.nodeType===Node.TEXT_NODE&&node.parentElement)process(node.parentElement);
+    }
+   }
+  });
+  observer.observe(document.querySelector('main'),{childList:true,subtree:true});
+ }
+ window.addEventListener('load',start,{once:true});
+})();
+</script>
+</body></html>

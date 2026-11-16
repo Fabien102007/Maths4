@@ -1,1 +1,21 @@
-{"id":"./","name":"Maths2 — Maîtriser les mathématiques","short_name":"Maths2","description":"Comprendre, apprendre et visualiser les mathématiques.","lang":"fr","start_url":"./","scope":"./","display":"standalone","orientation":"portrait","background_color":"#0b1220","theme_color":"#0b1220","icons":[{"src":"icons/math-logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "id": "./",
+  "name": "Maths4 — Comprendre les mathématiques",
+  "short_name": "Maths4",
+  "description": "Comprendre, apprendre et visualiser les mathématiques.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101824",
+  "theme_color": "#101824",
+  "icons": [
+    {
+      "src": "icons/math-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
