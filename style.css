@@ -26,3 +26,21 @@
   .exercise-actions{display:grid;grid-template-columns:1fr}
   .exercise-actions button{width:100%;min-height:42px}
 }
+/* Exercices progressifs, regroupés par chapitre comme dans Maths2 */
+.exercise-summary{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 20px}
+.exercise-chapter{margin:25px 0 34px}
+.chapter-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:13px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.chapter-heading .eyebrow{width:100%}
+.chapter-heading h2{font-size:19px;margin:0}
+.chapter-heading small{color:var(--muted);font-size:10px}
+.exercise-cards{display:grid;gap:12px}
+.exercise-item{padding:18px}
+.exercise-meta{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.difficulty-pill{font:9px 'DM Mono';padding:5px 8px;border-radius:20px;background:#25364d;color:#c9d8ec}
+.difficulty-0{background:#1d3b35;color:#a5e1c4}
+.difficulty-1{background:#3d3525;color:#f0d08d}
+.difficulty-2{background:#3d2b39;color:#f0b5d0}
+.exercise-prompt{font-size:13px;line-height:1.8;color:#d3dfed}
+.exercise-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.exercise-actions button{margin:0}
+@media(max-width:600px){.exercise-summary{display:block}.exercise-summary span{display:block;margin:5px 0}.exercise-actions{display:grid;grid-template-columns:1fr}.exercise-actions button{width:100%;min-height:42px}}
