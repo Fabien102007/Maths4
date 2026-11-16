@@ -57,3 +57,51 @@ mjx-container[display="true"]{display:block!important;margin:1em 0!important;tex
 #cardText mjx-container{overflow-x:auto;max-width:100%}
 .exercise-card .answer,.exercise-card .exercise-prompt{min-width:0;overflow-wrap:anywhere}
 .exercise-card .answer{overflow-x:auto}
+
+
+/* --- Identité visuelle Maths4 : graphite, bleu glacier et accent menthe --- */
+:root{
+ --bg:#101824;--panel:#172332;--panel2:#1d2d40;--line:#2b4056;
+ --text:#edf3fa;--muted:#9aadc1;--blue:#b8d5ff;--accent:#8bbcff;
+}
+body{background:radial-gradient(ellipse at 78% -12%,#1d3550 0,transparent 42%),var(--bg)}
+.sidebar{background:linear-gradient(180deg,#142235,#101a28);border-right-color:#2b4056}
+.logo{width:46px;height:46px;border:1px solid #52749b;background:linear-gradient(145deg,#203d5b,#182a40);box-shadow:0 8px 22px #0003}
+.logo img{width:34px;height:34px;display:block}
+.nav{transition:background .2s ease,color .2s ease,transform .2s ease}
+.nav:hover{transform:translateX(2px)}
+.nav.active{background:linear-gradient(100deg,#294766,#20364d);box-shadow:inset 3px 0 #9ac8ff}
+.hero{background:linear-gradient(115deg,#1b344d,#172536 72%);border-color:#38516d;box-shadow:0 18px 45px #0002}
+.hero h1 em{color:#a9d0ff}
+.stats article,.panel,.topic-card,.detail-block,.exercise-card,.ref-item,.review-summary article,.progress-row{
+ background:linear-gradient(145deg,#19293a,#152231);border-color:#2e4359;box-shadow:0 8px 24px #00000012
+}
+.topic-card:hover{border-color:#83b5ec;box-shadow:0 12px 28px #0003}
+.primary{background:linear-gradient(135deg,#477fba,#3d6fa8);border-color:#77a9d8}
+.primary:hover{background:linear-gradient(135deg,#568fc9,#477bb6)}
+.secondary,.filter{background:#203248;border-color:#3b5672}
+.filter.active{background:#315577;border-color:#77a9d8}
+input{background:#162638;border-color:#3b536d}
+.detail-head{background:linear-gradient(115deg,#203b57,#192b40);border-color:#3d5a78}
+.formula{font:500 17px Manrope,system-ui,sans-serif;background:#111e2d;border-color:#38516b;color:#d6e8ff}
+.flash{
+ perspective:1200px;transform-style:preserve-3d;backface-visibility:hidden;
+ transition:background .3s ease,border-color .3s ease,box-shadow .3s ease;
+ box-shadow:0 18px 44px #0004;
+}
+.flash.flipped{border-color:#4e8b7c}
+.flash.flip-out{animation:maths4FlipOut .21s ease-in forwards}
+.flash.flip-in{animation:maths4FlipIn .42s cubic-bezier(.2,.75,.25,1) both}
+@keyframes maths4FlipOut{to{transform:perspective(1000px) rotateY(88deg) scale(.97);opacity:.25}}
+@keyframes maths4FlipIn{from{transform:perspective(1000px) rotateY(-88deg) scale(.97);opacity:.25}to{transform:perspective(1000px) rotateY(0) scale(1);opacity:1}}
+.math-token{white-space:normal}
+mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
+.formula mjx-container{margin:.15em 0!important}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+@media(max-width:760px){
+ .hero{border-radius:16px}
+ .stats article,.panel{border-radius:12px}
+ .flash{min-height:300px}
+}
