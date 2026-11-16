@@ -7,3 +7,22 @@
 /* Onglet Exercices */
 .exercise-list{display:grid;gap:13px}.exercise-card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:19px}.exercise-card h3{margin:12px 0 8px;font-size:16px}.exercise-card p{color:#b4c4d7;font-size:12px;line-height:1.8}.exercise-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.exercise-actions button{margin:0}
 
+/* Restauration explicite du menu latéral et de la liste des exercices */
+@media(max-width:900px){
+  body .sidebar{position:fixed;top:0;bottom:0;left:0;width:min(290px,84vw);height:100dvh;transform:translateX(-105%);transition:transform .25s ease;z-index:1000;overflow-y:auto;box-shadow:18px 0 45px #0009}
+  body .sidebar.open{transform:translateX(0)}
+  body main{margin-left:0!important;padding-left:16px!important;padding-right:16px!important}
+  body .topbar{position:sticky;top:0;z-index:20;background:#0b1220f2;backdrop-filter:blur(10px)}
+  body .menu{display:inline-flex!important;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #405775;border-radius:10px;background:#172941;color:#e8eff8;font-size:23px;line-height:1;cursor:pointer;flex:0 0 42px}
+}
+.exercise-list{display:flex!important;flex-direction:column;gap:14px}
+.exercise-card{display:block;background:linear-gradient(145deg,#14243a,#101c2d);border:1px solid #344b68;border-radius:14px;padding:20px}
+.exercise-card h3{font-size:17px;line-height:1.45;margin:12px 0 9px;color:#e8eff8}
+.exercise-card p{font-size:13px;line-height:1.85;color:#bdcce0;margin:0}
+.exercise-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.exercise-actions button{margin:0}
+@media(max-width:600px){
+  .exercise-card{padding:16px}
+  .exercise-actions{display:grid;grid-template-columns:1fr}
+  .exercise-actions button{width:100%;min-height:42px}
+}
