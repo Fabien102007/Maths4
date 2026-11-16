@@ -35,6 +35,49 @@
     $('#fallbackAnswer')?.addEventListener('click',()=>$('#fallbackAnswerText').hidden=!$('#fallbackAnswerText').hidden);
     show('topic');
   }
+  let fallbackExerciseLevel='Tous', fallbackExerciseCategory='Toutes';
+  function fallbackExercises(){
+    const host=$('#exerciseList'); if(!host||typeof TOPICS==='undefined'||!Array.isArray(TOPICS)) return;
+    const q=($('#exerciseSearch')?.value||'').trim().toLocaleLowerCase('fr');
+    const list=TOPICS.filter(t=>t.exercise&&
+      (fallbackExerciseLevel==='Tous'||t.level===fallbackExerciseLevel)&&
+      (fallbackExerciseCategory==='Toutes'||t.category===fallbackExerciseCategory)&&
+      (String(t.title||'')+' '+String(t.exercise||'')+' '+String(t.desc||'')).toLocaleLowerCase('fr').includes(q));
+    host.innerHTML=list.map(t=>`<article class="exercise-card">
+      <div class="meta"><span class="pill">${t.level}</span><span class="pill">${t.category}</span></div>
+      <h3>${t.title}</h3><p>${t.exercise}</p>
+      <div class="exercise-actions">
+        <button class="secondary" data-fallback-ex-hint="${t.id}">Afficher un indice</button>
+        <button class="secondary" data-fallback-ex-answer="${t.id}">Afficher la correction</button>
+        <button class="primary" data-fallback-open-topic="${t.id}">Ouvrir le cours →</button>
+      </div>
+      <div class="answer hint" id="fallback-ex-hint-${t.id}" hidden>${t.hint||'Aucun indice disponible.'}</div>
+      <div class="answer" id="fallback-ex-answer-${t.id}" hidden>${t.answer||'Aucune correction disponible.'}</div>
+    </article>`).join('')||'<p class="muted">Aucun exercice ne correspond à cette recherche.</p>';
+    const count=$('#exerciseCount'); if(count) count.textContent=`${list.length} exercice(s)`;
+  }
+  if(!window.__MATHS2_APP_READY__){
+    fallbackExercises();
+    $('#exerciseSearch')?.addEventListener('input',fallbackExercises);
+    document.querySelectorAll('[data-ex-level]').forEach(b=>b.addEventListener('click',()=>{
+      fallbackExerciseLevel=b.dataset.exLevel;
+      document.querySelectorAll('[data-ex-level]').forEach(x=>x.classList.toggle('active',x===b));
+      fallbackExercises();
+    }));
+    document.querySelectorAll('[data-ex-category]').forEach(b=>b.addEventListener('click',()=>{
+      fallbackExerciseCategory=b.dataset.exCategory;
+      document.querySelectorAll('[data-ex-category]').forEach(x=>x.classList.toggle('active',x===b));
+      fallbackExercises();
+    }));
+    document.addEventListener('click',e=>{
+      const hint=e.target.closest('[data-fallback-ex-hint]');
+      const answer=e.target.closest('[data-fallback-ex-answer]');
+      const open=e.target.closest('[data-fallback-open-topic]');
+      if(hint){const el=$('#fallback-ex-hint-'+hint.dataset.fallbackExHint);if(el)el.hidden=!el.hidden;}
+      if(answer){const el=$('#fallback-ex-answer-'+answer.dataset.fallbackExAnswer);if(el)el.hidden=!el.hidden;}
+      if(open){e.preventDefault();fallbackTopic(open.dataset.fallbackOpenTopic);}
+    });
+  }
   document.addEventListener('click',e=>{
     if(window.__MATHS2_APP_READY__) return;
     const nav=e.target.closest('[data-view]');
