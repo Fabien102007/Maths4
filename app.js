@@ -42,6 +42,7 @@ function renderExercises(){
   return `<section class="exercise-chapter"><div class="chapter-heading"><span class="eyebrow">ENTRAÎNEMENT PAR CHAPITRE</span><h2>${chapter}</h2><small>${group.length} exercice(s)</small></div><div class="exercise-cards">${cards}</div></section>`;
  }).join('')||'<p class="muted">Aucun exercice ne correspond à cette recherche.</p>';
  const count=$('#exerciseCount');if(count)count.textContent=`${items.length} exercice(s)`;
+ if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([host]).catch(()=>{});
  host.querySelectorAll('[data-ex-hint]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-hint-panel="'+b.dataset.exHint+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Afficher un indice':'Masquer l’indice';}}));
  host.querySelectorAll('[data-ex-answer]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-answer-panel="'+b.dataset.exAnswer+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Voir la correction':'Masquer la correction';}}));
  host.querySelectorAll('[data-open-topic]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openCourseFromExercise(b.dataset.openTopic);}));
