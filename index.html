@@ -145,7 +145,7 @@
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
    acceptNode(node){
     const p=node.parentElement;
-    if(!p||p.closest('script,style,textarea,pre,code,button,.math-token,.MathJax,.MathJax_Preview'))return NodeFilter.FILTER_REJECT;
+    if(!p||p.closest('script,style,textarea,pre,code,button,.math-token,.MathJax,.MathJax_Preview,mjx-container'))return NodeFilter.FILTER_REJECT;
     const s=node.nodeValue||'';
     if(!s.trim()||s.includes('\\(')||s.includes('\\[')||s.includes('</html>
 ))return NodeFilter.FILTER_REJECT;
