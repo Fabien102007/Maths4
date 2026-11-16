@@ -68,8 +68,36 @@ else if(visualType==='trig'){ctx.strokeStyle='#82b5ff';ctx.lineWidth=2;ctx.begin
 else if(visualType==='eigen'){line(x=>.6*x,-3,3,'#82b5ff',2);const l=visualValue;ctx.strokeStyle='#e0b86d';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(X(-1),Y(-l));ctx.lineTo(X(1),Y(l));ctx.stroke();dot(1,l,'#e0b86d')}
 }
 window.addEventListener('resize',()=>{if($('#mathCanvas')){resizeCanvas();drawVisual()}});
-function due(card){const r=state.reviews[card.id];return !r||r.due<=Date.now()}function cardList(){return CARDS.filter(c=>(category==='Toutes'||c.category===category)&&(!dueOnly||due(c)))}function renderCard(){const list=cardList();if(!list.length){$('#cardMeta').textContent='RÉVISIONS TERMINÉES';$('#cardSide').textContent='BRAVO';$('#cardText').textContent='Aucune carte à réviser dans ce filtre. Tu peux changer de catégorie ou désactiver le filtre.';$('#cardCount').textContent='0 carte';$('#ratings').hidden=true;$('#flash').classList.remove('flipped');$('#flip').disabled=true;return}$('#flip').disabled=false;cardIndex=(cardIndex+list.length)%list.length;const c=list[cardIndex];$('#cardMeta').textContent=c.category.toUpperCase()+' · '+c.level;$('#cardSide').textContent=flipped?'RÉPONSE':'QUESTION';$('#cardText').textContent=flipped?c.a:c.q;$('#cardCount').textContent=`${cardIndex+1} / ${list.length}`;$('#flash').classList.toggle('flipped',flipped);$('#ratings').hidden=!flipped;}
-function flip(){if(!cardList().length)return;flipped=!flipped;renderCard()}$('#flash').addEventListener('click',flip);$('#flip').addEventListener('click',flip);$('#prev').addEventListener('click',()=>{cardIndex--;flipped=false;renderCard()});$('#next').addEventListener('click',()=>{cardIndex++;flipped=false;renderCard()});$$('[data-cat]').forEach(b=>b.addEventListener('click',()=>{$$('[data-cat]').forEach(x=>x.classList.remove('active'));b.classList.add('active');category=b.dataset.cat;cardIndex=0;flipped=false;renderCard()}));$('#dueToggle').addEventListener('click',()=>{dueOnly=!dueOnly;$('#dueToggle').classList.toggle('active',dueOnly);cardIndex=0;flipped=false;renderCard()});$$('[data-rate]').forEach(b=>b.addEventListener('click',()=>{const c=cardList()[cardIndex];if(!c)return;const old=state.reviews[c.id]||{interval:0,repetitions:0};const rate=b.dataset.rate;let days=rate==='again'?1:rate==='hard'?Math.max(2,Math.round((old.interval||1)*1.5)):rate==='good'?[1,3,7,14,30][Math.min(old.repetitions||0,4)]:Math.max(7,(old.interval||3)*2);state.reviews[c.id]={interval:days,repetitions:rate==='again'?0:(old.repetitions||0)+1,due:Date.now()+days*86400000,last:Date.now(),rating:rate};save();cardIndex=0;flipped=false;renderCard()}));
+function due(card){const r=state.reviews[card.id];return !r||r.due<=Date.now()}function cardList(){return CARDS.filter(c=>(category==='Toutes'||c.category===category)&&(!dueOnly||due(c)))}function cardMarkup(value){
+ const s=String(value??'');
+ const escaped=s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+ const hasMath=/[=<>≤≥≠±∞∑∫√∀∃ελημσπ∈∉⊂∩∪‖′ₙ₀₁₂³⁴⁵⁺⁻]|\\(?:frac|lim|sum|int|sqrt|mathbb|infty|langle|rangle|cdot|to|leq|geq|neq|forall|exists|begin|boxed|alpha|beta)/.test(s);
+ return hasMath?'\\(\\displaystyle '+escaped+'\\)':escaped;
+}
+function renderCard(){
+ const list=cardList(),host=$('#cardText');
+ if(!list.length){
+  $('#cardMeta').textContent='RÉVISIONS TERMINÉES';$('#cardSide').textContent='BRAVO';
+  if(window.MathJax?.typesetClear)window.MathJax.typesetClear([host]);
+  host.textContent='Aucune carte à réviser dans ce filtre. Tu peux changer de catégorie ou désactiver le filtre.';
+  $('#cardCount').textContent='0 carte';$('#ratings').hidden=true;$('#flash').classList.remove('flipped');$('#flip').disabled=true;return;
+ }
+ $('#flip').disabled=false;cardIndex=(cardIndex+list.length)%list.length;
+ const c=list[cardIndex];$('#cardMeta').textContent=c.category.toUpperCase()+' · '+c.level;
+ $('#cardSide').textContent=flipped?'RÉPONSE':'QUESTION';
+ if(window.MathJax?.typesetClear)window.MathJax.typesetClear([host]);
+ host.innerHTML=cardMarkup(flipped?c.a:c.q);
+ $('#cardCount').textContent=(cardIndex+1)+' / '+list.length;
+ $('#flash').classList.toggle('flipped',flipped);$('#ratings').hidden=!flipped;
+ if(window.MathJax?.typesetPromise)window.MathJax.typesetPromise([host]).catch(()=>{});
+}
+function flip(){if(!cardList().length)return;flipped=!flipped;renderCard()}
+$('#flash').addEventListener('click',flip);$('#flip').addEventListener('click',flip);
+$('#prev').addEventListener('click',()=>{cardIndex--;flipped=false;renderCard()});
+$('#next').addEventListener('click',()=>{cardIndex++;flipped=false;renderCard()});
+$$('[data-cat]').forEach(b=>b.addEventListener('click',()=>{$$('[data-cat]').forEach(x=>x.classList.remove('active'));b.classList.add('active');category=b.dataset.cat;cardIndex=0;flipped=false;renderCard()}));
+$('#dueToggle').addEventListener('click',()=>{dueOnly=!dueOnly;$('#dueToggle').classList.toggle('active',dueOnly);cardIndex=0;flipped=false;renderCard()});
+$$('[data-rate]').forEach(b=>b.addEventListener('click',()=>{const c=cardList()[cardIndex];if(!c)return;const old=state.reviews[c.id]||{interval:0,repetitions:0};const rate=b.dataset.rate;let days=rate==='again'?1:rate==='hard'?Math.max(2,Math.round((old.interval||1)*1.5)):rate==='good'?[1,3,7,14,30][Math.min(old.repetitions||0,4)]:Math.max(7,(old.interval||3)*2);state.reviews[c.id]={interval:days,repetitions:rate==='again'?0:(old.repetitions||0)+1,due:Date.now()+days*86400000,last:Date.now(),rating:rate};save();cardIndex=0;flipped=false;renderCard()}));
 function renderRefs(){const q=$('#refSearch').value.toLocaleLowerCase('fr');$('#refs').innerHTML=REFERENCES.filter(r=>(`${r.title} ${r.definition} ${r.props.join(' ')}`).toLocaleLowerCase('fr').includes(q)).map((r,i)=>`<article class="ref-item"><button class="ref-head"><span>∴</span><strong>${r.title}</strong><span class="pill">${r.level}</span><span>⌄</span></button><div class="ref-body"><p>${r.definition}</p><div class="formula">${r.formula}</div><ul>${r.props.map(p=>`<li>${p}</li>`).join('')}</ul></div></article>`).join('');$$('.ref-head').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')))}$('#refSearch').addEventListener('input',renderRefs);
 function renderProgress(){const dueCount=CARDS.filter(due).length,reviewed=CARDS.length-dueCount;$('#reviewSummary').innerHTML=`<article><strong>${dueCount}</strong><span>Cartes à revoir maintenant</span></article><article><strong>${reviewed}</strong><span>Cartes déjà planifiées</span></article><article><strong>${CARDS.length}</strong><span>Total de cartes</span></article>`;$('#progressList').innerHTML=TOPICS.map(t=>`<div class="progress-row"><span>${t.title}</span><small>${t.level} · ${t.category}</small><button data-master="${t.id}">${state.mastered.includes(t.id)?'Maîtrisée ✓':'À travailler'}</button></div>`).join('');$$('[data-master]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.master;state.mastered=state.mastered.includes(id)?state.mastered.filter(x=>x!==id):[...state.mastered,id];save();renderProgress();renderTopics()}))}
 $('#addSession').addEventListener('click',()=>{state.sessions++;save();renderProgress()});$('#reset').addEventListener('click',()=>{if(confirm('Effacer la progression enregistrée sur cet appareil ?')){state={mastered:[],sessions:0,reviews:{},seen:[]};save();renderProgress();renderTopics();renderCard()}});
