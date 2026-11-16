@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const KEY='maths2_progress_v3';let state;try{state=JSON.parse(localStorage.getItem(KEY)||'{}')}catch{state={}};state.mastered=Array.isArray(state.mastered)?state.mastered:[];state.sessions=Number(state.sessions)||0;state.reviews=state.reviews&&typeof state.reviews==='object'?state.reviews:{};state.seen=Array.isArray(state.seen)?state.seen:[];
-let level='Tous',category='Toutes',dueOnly=false,cardIndex=0,flipped=false,currentTopic=null,visualFrame=0,raf=0;
+let level='Tous',category='Toutes',dueOnly=false,cardIndex=0,flipped=false,flippingNow=false,currentTopic=null,visualFrame=0,raf=0;
 const save=()=>{localStorage.setItem(KEY,JSON.stringify(state));stats()};
 function go(id){if(id==='exercises'&&typeof renderExercises==='function')renderExercises();document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===id||(id==='topic'&&b.dataset.view==='learn')));$('#crumb').textContent=({home:"VUE D'ENSEMBLE",learn:'APPRENDRE',topic:'NOTION',exercises:'EXERCICES',cards:'FLASHCARDS',reference:'RÉFÉRENTIEL',progress:'PROGRESSION'})[id]||id.toUpperCase();$('#sidebar').classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});if(id==='progress')renderProgress();if(id!=='topic'&&raf){cancelAnimationFrame(raf);raf=0}}
 $$('[data-view]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));$('#menu').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));$('#today').textContent=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'}).format(new Date()).toUpperCase();
@@ -91,7 +91,7 @@ function renderCard(){
  $('#flash').classList.toggle('flipped',flipped);$('#ratings').hidden=!flipped;
  if(window.MathJax?.typesetPromise)window.MathJax.typesetPromise([host]).catch(()=>{});
 }
-function flip(){if(!cardList().length)return;flipped=!flipped;renderCard()}
+function flip(){if(!cardList().length||flippingNow)return;flippingNow=true;const flash=$('#flash');flash.classList.add('flip-out');setTimeout(()=>{flipped=!flipped;renderCard();flash.classList.remove('flip-out');flash.classList.add('flip-in');setTimeout(()=>{flash.classList.remove('flip-in');flippingNow=false},420)},210)}
 $('#flash').addEventListener('click',flip);$('#flip').addEventListener('click',flip);
 $('#prev').addEventListener('click',()=>{cardIndex--;flipped=false;renderCard()});
 $('#next').addEventListener('click',()=>{cardIndex++;flipped=false;renderCard()});
