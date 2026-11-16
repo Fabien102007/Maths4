@@ -10,19 +10,43 @@ function renderTopics(){const q=$('#search').value.toLocaleLowerCase('fr');const
 $$('[data-level]').forEach(b=>b.addEventListener('click',()=>{$$('.filter[data-level]').forEach(x=>x.classList.remove('active'));b.classList.add('active');level=b.dataset.level;renderTopics()}));$('#search').addEventListener('input',renderTopics);
 function showTopic(id){const t=TOPICS.find(x=>x.id===id);if(!t)return;currentTopic=t;const done=state.mastered.includes(id);$('#topicContent').innerHTML=`<div class="detail-head"><div class="meta"><span class="pill">${t.level}</span><span class="pill">${t.category}</span></div><h1>${t.title}</h1><p>${t.desc}</p><button class="${done?'secondary':'primary'}" id="masterBtn">${done?'Retirer des notions maîtrisées':'Marquer comme maîtrisée ✓'}</button></div><div class="detail-columns"><article class="detail-block"><h3>Définition</h3><p>${t.definition}</p><div class="formula">${t.formula}</div><h3>Propriétés essentielles</h3><ul>${t.props.map(p=>`<li>${p}</li>`).join('')}</ul></article><aside class="detail-block"><h3>À retenir</h3><p>Comprends les hypothèses de chaque résultat : elles sont aussi importantes que la conclusion.</p><p class="muted">Conseil : reformule la définition sans regarder, puis reconstruis une démonstration.</p></aside></div><div class="exercise"><span class="eyebrow">ENTRAÎNEMENT GUIDÉ</span><h3>Exercice</h3><p>${t.exercise}</p><button class="secondary" id="hintBtn">Afficher un indice</button><button class="secondary" id="answerBtn">Afficher la correction</button><div id="hint" class="answer hint" hidden>${t.hint}</div><div id="answer" class="answer" hidden>${t.answer}</div></div>${t.visual?visualMarkup(t.visual):''}<div class="quiz" id="quiz"><span class="eyebrow">VÉRIFIER SA COMPRÉHENSION</span><h3>Mini-QCM</h3><div id="quizBody"></div></div>`;
 $('#masterBtn').addEventListener('click',()=>{if(state.mastered.includes(id))state.mastered=state.mastered.filter(x=>x!==id);else state.mastered.push(id);save();showTopic(id);renderTopics()});$('#hintBtn').addEventListener('click',()=>$('#hint').hidden=!$('#hint').hidden);$('#answerBtn').addEventListener('click',()=>$('#answer').hidden=!$('#answer').hidden);renderQuiz(t);go('topic');if(t.visual){resizeCanvas();startVisual(t.visual)}}
-let exerciseLevel='Tous',exerciseCategory='Toutes';
-function renderExercises(){
- const q=($('#exerciseSearch')?.value||'').toLocaleLowerCase('fr');
- const list=TOPICS.filter(t=>t.exercise&&(exerciseLevel==='Tous'||t.level===exerciseLevel)&&(exerciseCategory==='Toutes'||t.category===exerciseCategory)&&(`${t.title} ${t.exercise} ${t.desc}`).toLocaleLowerCase('fr').includes(q));
- const host=$('#exerciseList');if(!host)return;
- host.innerHTML=list.map(t=>`<article class="exercise-card"><div class="meta"><span class="pill">${t.level}</span><span class="pill">${t.category}</span></div><h3>${t.title}</h3><p>${t.exercise}</p><div class="exercise-actions"><button class="secondary" data-ex-hint="${t.id}">Afficher un indice</button><button class="secondary" data-ex-answer="${t.id}">Afficher la correction</button><button class="primary" data-open-topic="${t.id}">Ouvrir le cours →</button></div><div class="answer hint" id="ex-hint-${t.id}" hidden>${t.hint||'Aucun indice disponible.'}</div><div class="answer" id="ex-answer-${t.id}" hidden>${t.answer||'Aucune correction disponible.'}</div></article>`).join('')||'<p class="muted">Aucun exercice ne correspond à cette recherche.</p>';
- $('#exerciseCount').textContent=`${list.length} exercice(s)`;
- document.querySelectorAll('[data-ex-hint]').forEach(b=>b.addEventListener('click',()=>{const el=$('#ex-hint-'+b.dataset.exHint);el.hidden=!el.hidden;}));
- document.querySelectorAll('[data-ex-answer]').forEach(b=>b.addEventListener('click',()=>{const el=$('#ex-answer-'+b.dataset.exAnswer);el.hidden=!el.hidden;}));
- document.querySelectorAll('[data-open-topic]').forEach(b=>b.addEventListener('click',()=>showTopic(b.dataset.openTopic)));
+let exerciseDifficulty='Tous';
+function openCourseFromExercise(id){
+ const t=TOPICS.find(x=>String(x.id)===String(id));
+ if(!t)return;
+ try{showTopic(t.id);return;}catch(error){console.error('Affichage du cours principal impossible, ouverture de secours.',error);}
+ const host=$('#topicContent');
+ if(!host)return;
+ host.innerHTML=`<div class="detail-head"><div class="meta"><span class="pill">${t.level}</span><span class="pill">${t.category}</span></div><h1>${t.title}</h1><p>${t.desc||''}</p></div><div class="detail-columns"><article class="detail-block"><h3>Définition</h3><p>${t.definition||'Définition non renseignée.'}</p><div class="formula">${t.formula||''}</div><h3>Propriétés essentielles</h3><ul>${(t.props||[]).map(p=>'<li>'+p+'</li>').join('')}</ul></article><aside class="detail-block"><h3>Exercice du cours</h3><p>${t.exercise||''}</p><h3>Exemple de raisonnement</h3><p>Repars de la définition, vérifie les hypothèses et justifie chaque étape.</p></aside></div>`;
+ go('topic');
 }
-document.querySelectorAll('[data-ex-level]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-ex-level]').forEach(x=>x.classList.remove('active'));b.classList.add('active');exerciseLevel=b.dataset.exLevel;renderExercises()}));
-document.querySelectorAll('[data-ex-category]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-ex-category]').forEach(x=>x.classList.remove('active'));b.classList.add('active');exerciseCategory=b.dataset.exCategory;renderExercises()}));
+window.openMaths4Course=openCourseFromExercise;
+function renderExercises(){
+ const query=($('#exerciseSearch')?.value||'').trim().toLocaleLowerCase('fr');
+ const bank=[...(Array.isArray(EXERCISES)?EXERCISES:[])];
+ const covered=new Set(bank.map(ex=>ex.topic));
+ TOPICS.filter(t=>t.exercise&&!covered.has(t.id)).forEach((t,i)=>bank.push({id:'base-'+t.id,topic:t.id,difficulty:'Facile',question:t.exercise,hint:t.hint||'Repars de la définition et identifie le théorème utile.',answer:t.answer||'Rédige en rappelant les hypothèses et en justifiant chaque implication.'}));
+ const rank={Facile:0,Intermédiaire:1,Avancé:2};
+ const topics=new Map(TOPICS.map(t=>[t.id,t]));
+ const items=bank.filter(ex=>(exerciseDifficulty==='Tous'||ex.difficulty===exerciseDifficulty))
+  .filter(ex=>{const t=topics.get(ex.topic);return (String(ex.question)+' '+String(t?.title||'')+' '+String(t?.chapter||'')).toLocaleLowerCase('fr').includes(query);})
+  .sort((a,b)=>(rank[a.difficulty]??9)-(rank[b.difficulty]??9)||String(a.id).localeCompare(String(b.id),undefined,{numeric:true}));
+ const groups=[...new Set(items.map(ex=>topics.get(ex.topic)?.chapter||'Exercices complémentaires'))];
+ const host=$('#exerciseList');if(!host)return;
+ host.innerHTML=groups.map(chapter=>{
+  const group=items.filter(ex=>(topics.get(ex.topic)?.chapter||'Exercices complémentaires')===chapter);
+  const cards=group.map(ex=>{
+   const t=topics.get(ex.topic),id=String(ex.id).replace(/[^a-zA-Z0-9_-]/g,'-');
+   return `<article class="exercise-card exercise-item"><div class="exercise-meta"><span class="pill">${t?.level||'L1'}</span><span class="pill">${t?.category||'Mathématiques'}</span><span class="difficulty-pill difficulty-${rank[ex.difficulty]??0}">${ex.difficulty}</span></div><h3>${t?.title||'Exercice'}</h3><p class="exercise-prompt">${ex.question}</p><div class="exercise-actions"><button class="secondary" data-ex-hint="${id}">Afficher un indice</button><button class="secondary" data-ex-answer="${id}">Voir la correction</button>${t?`<button class="primary" data-open-topic="${t.id}">Ouvrir le cours →</button>`:''}</div><div class="answer hint" data-hint-panel="${id}" hidden>${ex.hint||'Aucun indice disponible.'}</div><div class="answer" data-answer-panel="${id}" hidden>${ex.answer||'Aucune correction disponible.'}</div></article>`;
+  }).join('');
+  return `<section class="exercise-chapter"><div class="chapter-heading"><span class="eyebrow">ENTRAÎNEMENT PAR CHAPITRE</span><h2>${chapter}</h2><small>${group.length} exercice(s)</small></div><div class="exercise-cards">${cards}</div></section>`;
+ }).join('')||'<p class="muted">Aucun exercice ne correspond à cette recherche.</p>';
+ const count=$('#exerciseCount');if(count)count.textContent=`${items.length} exercice(s)`;
+ host.querySelectorAll('[data-ex-hint]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-hint-panel="'+b.dataset.exHint+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Afficher un indice':'Masquer l’indice';}}));
+ host.querySelectorAll('[data-ex-answer]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-answer-panel="'+b.dataset.exAnswer+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Voir la correction':'Masquer la correction';}}));
+ host.querySelectorAll('[data-open-topic]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openCourseFromExercise(b.dataset.openTopic);}));
+}
+document.querySelectorAll('[data-ex-difficulty]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-ex-difficulty]').forEach(x=>x.classList.toggle('active',x===b));exerciseDifficulty=b.dataset.exDifficulty;renderExercises();}));
 $('#exerciseSearch').addEventListener('input',renderExercises);
 function renderQuiz(t){const bank=[{q:`Quelle affirmation correspond à la notion « ${t.title} » ?`,a:t.props[0],wrong:['Toute fonction est automatiquement dérivable.','Une limite peut prendre deux valeurs distinctes.','Le déterminant est toujours positif.']},{q:'Quel est le bon réflexe mathématique ?',a:'Vérifier les hypothèses avant d’appliquer un théorème.',wrong:['Appliquer une formule sans vérifier ses conditions.','Confondre réciproque et implication.','Remplacer une preuve par un exemple.']}];let qi=0;function draw(){const item=bank[qi],opts=[item.a,...item.wrong].sort(()=>Math.random()-.5);$('#quizBody').innerHTML=`<p>${item.q}</p><div class="quiz-options">${opts.map(o=>`<button class="secondary" data-answer="${encodeURIComponent(o)}">${o}</button>`).join('')}</div><div id="quizFeedback" class="feedback" hidden></div><button id="nextQuiz" class="primary" hidden>Question suivante →</button>`;$$('[data-answer]').forEach(b=>b.addEventListener('click',()=>{const ok=decodeURIComponent(b.dataset.answer)===item.a;$$('[data-answer]').forEach(x=>x.disabled=true);const f=$('#quizFeedback');f.hidden=false;f.textContent=ok?'Bonne réponse. '+item.a:'Pas tout à fait. '+item.a;f.style.borderLeftColor=ok?'#73cbb0':'#d9b46d';$('#nextQuiz').hidden=false}));$('#nextQuiz').addEventListener('click',()=>{qi=(qi+1)%bank.length;draw()})}draw()}
 function visualMarkup(type){return `<div class="topic-visual"><div class="section-title"><div><span class="eyebrow">VISUALISATION INTERACTIVE</span><h2>Manipuler pour comprendre</h2></div><span class="muted">Animation haute résolution</span></div><div class="visual-box"><canvas id="mathCanvas" width="1000" height="520" aria-label="Animation mathématique"></canvas><div class="visual-controls" id="visualControls"></div></div><p class="muted" id="visualCaption">Fais varier le paramètre et observe la représentation.</p></div>`}
