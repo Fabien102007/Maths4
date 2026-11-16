@@ -44,3 +44,16 @@
 .exercise-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .exercise-actions button{margin:0}
 @media(max-width:600px){.exercise-summary{display:block}.exercise-summary span{display:block;margin:5px 0}.exercise-actions{display:grid;grid-template-columns:1fr}.exercise-actions button{width:100%;min-height:42px}}
+
+/* Rendu mathématique robuste : les longues expressions restent dans leur carte. */
+mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+mjx-container[display="true"]{display:block!important;margin:1em 0!important;text-align:center;overflow-x:auto}
+.answer mjx-container[display="true"],.exercise-prompt mjx-container[display="true"],.detail-block mjx-container[display="true"]{text-align:left}
+.flash{perspective:1200px;transform-style:preserve-3d;transition:transform .62s cubic-bezier(.2,.75,.25,1),background .35s,border-color .35s;will-change:transform}
+.flash>*{transition:transform .62s cubic-bezier(.2,.75,.25,1);backface-visibility:hidden}
+.flash.flipped{transform:rotateY(180deg)}
+.flash.flipped>*{transform:rotateY(180deg)}
+#cardText{max-width:100%;overflow-wrap:anywhere}
+#cardText mjx-container{overflow-x:auto;max-width:100%}
+.exercise-card .answer,.exercise-card .exercise-prompt{min-width:0;overflow-wrap:anywhere}
+.exercise-card .answer{overflow-x:auto}
