@@ -44,7 +44,7 @@ function renderExercises(){
  const count=$('#exerciseCount');if(count)count.textContent=`${items.length} exercice(s)`;
  if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([host]).catch(()=>{});
  host.querySelectorAll('[data-ex-hint]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-hint-panel="'+b.dataset.exHint+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Afficher un indice':'Masquer l’indice';}}));
- host.querySelectorAll('[data-ex-answer]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-answer-panel="'+b.dataset.exAnswer+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Voir la correction':'Masquer la correction';}}));
+ host.querySelectorAll('[data-ex-answer]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-answer-panel="'+b.dataset.exAnswer+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Voir la correction':'Masquer la correction';if(!el.hidden&&window.MathJax?.typesetPromise)window.MathJax.typesetPromise([el]).catch(()=>{});}}));
  host.querySelectorAll('[data-open-topic]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openCourseFromExercise(b.dataset.openTopic);}));
 }
 document.querySelectorAll('[data-ex-difficulty]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-ex-difficulty]').forEach(x=>x.classList.toggle('active',x===b));exerciseDifficulty=b.dataset.exDifficulty;renderExercises();}));
