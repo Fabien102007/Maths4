@@ -34,7 +34,7 @@ function exerciseMathHtml(value){
  return raw.split(/(\s+)/).map(part=>{
   if(!part||/^\s+$/.test(part))return part;
   const looksMath=special.test(part)||(/[0-9]/.test(part)&&/[=<>+\-−×÷*/^_()[\]{}:,]/.test(part));
-  return looksMath?'<span class=\"math-token\">\\('+convert(part)+'\\\\)</span>':esc(part);
+  return looksMath?'<span class=\"math-token\">\\('+convert(part)+'\\)</span>':esc(part);
  }).join('').split(String.fromCharCode(10)).join('<br>');
 }
 function renderExercises(){
