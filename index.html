@@ -6,7 +6,46 @@
 <section class="view" id="learn"><div class="intro"><span class="eyebrow">COURS & NOTIONS</span><h1>Apprendre avec méthode.</h1><p>Choisis une notion, comprends les définitions et propriétés, puis teste-toi.</p></div><div class="toolbar"><div class="filters" id="levels"><button class="filter active" data-level="Tous">Tout</button><button class="filter" data-level="L1">L1</button><button class="filter" data-level="L2">L2</button><button class="filter" data-level="MP">MP</button></div><input id="search" placeholder="Rechercher une notion…"></div><div id="topics" class="topic-grid"></div></section>
 <section class="view" id="exercises"><div class="intro"><span class="eyebrow">ENTRAÎNEMENT AUTONOME</span><h1>Exercices.</h1><p>Retrouve tous les exercices des notions dans un espace dédié. Travaille d’abord seul, puis affiche un indice ou la correction.</p></div><div class="toolbar"><div class="filters" id="exerciseDifficulty"><button class="filter active" data-ex-difficulty="Tous">Tous</button><button class="filter" data-ex-difficulty="Facile">Facile</button><button class="filter" data-ex-difficulty="Intermédiaire">Intermédiaire</button><button class="filter" data-ex-difficulty="Avancé">Avancé</button></div><input id="exerciseSearch" placeholder="Rechercher un chapitre ou un exercice…"></div><div class="exercise-summary"><span class="muted" id="exerciseCount"></span><span class="muted">Chaque exercice renvoie directement à sa fiche de cours.</span></div><div id="exerciseList" class="exercise-list"></div></section>
 <section class="view" id="topic"><button class="back" data-go="learn">← Retour aux notions</button><div id="topicContent"></div></section>
-<section class="view" id="cards"><div class="intro"><span class="eyebrow">MÉMORISATION ACTIVE</span><h1>Flashcards.</h1><p>Essaie de retrouver la réponse avant de retourner la carte.</p></div><div class="toolbar"><div class="filters"><button class="filter active" data-cat="Toutes">Toutes</button><button class="filter" data-cat="Analyse">Analyse</button><button class="filter" data-cat="Algèbre">Algèbre</button><button class="filter" id="dueToggle">À réviser</button></div><span id="cardCount" class="muted"></span></div><div class="flash-wrap"><button id="flash" class="flash"><small id="cardMeta">ANALYSE · L1</small><span id="cardSide">QUESTION</span><strong id="cardText">Qu'est-ce qu'une suite convergente ?</strong><small>CLIQUER POUR RETOURNER ↻</small></button><div class="actions"><button class="secondary" id="prev">← Précédente</button><button class="primary" id="flip">Voir la réponse ↻</button><button class="secondary" id="next">Suivante →</button></div><div class="ratings" id="ratings" hidden><span>Évalue ton rappel :</span><button data-rate="again">À revoir · 1 j</button><button data-rate="hard">Difficile</button><button data-rate="good">Bien</button><button data-rate="easy">Facile</button></div></div></section>
+<section class="view" id="cards">
+ <div class="intro"><span class="eyebrow">MÉMORISATION ACTIVE</span><h1>Flashcards.</h1><p>Essaie de retrouver la réponse avant de retourner la carte, puis évalue honnêtement ton rappel.</p></div>
+ <div class="card-tools panel">
+  <div class="toolbar">
+   <div class="filters"><button class="filter active" data-cat="Toutes">Toutes</button><button class="filter" data-cat="Analyse">Analyse</button><button class="filter" data-cat="Algèbre">Algèbre</button><button class="filter" id="dueToggle">À réviser</button></div>
+   <span id="cardCount" class="muted"></span>
+  </div>
+  <div class="card-stats">
+   <article><strong id="cardDueCount">0</strong><span>À réviser</span></article>
+   <article><strong id="cardLearnedCount">0</strong><span>Déjà maîtrisées</span></article>
+   <article><strong id="cardScheduledCount">0</strong><span>Programmées</span></article>
+  </div>
+ </div>
+ <div class="flash-wrap">
+  <div class="flash-progress"><span id="cardCounter">Carte 1</span><span id="cardStatus" class="status-pill">Non évaluée</span></div>
+  <div class="flash-scene" id="flashScene" role="button" tabindex="0" aria-label="Retourner la flashcard">
+   <div class="flash-inner" id="flashInner">
+    <article class="flash-face flash-front">
+     <div class="flash-face-head"><span class="flash-badge" id="cardMeta">ANALYSE · L1</span><span class="flash-hint">↻ Cliquer pour retourner</span></div>
+     <div class="flash-main"><small>QUESTION</small><strong id="cardQuestion">Chargement…</strong></div>
+     <div class="flash-face-foot">RECTO · QUESTION DE COURS</div>
+    </article>
+    <article class="flash-face flash-back">
+     <div class="flash-face-head"><span class="flash-badge answer-badge">RÉPONSE</span><span class="flash-hint">↻ Retourner</span></div>
+     <div class="flash-main answer-main"><small>ÉLÉMENTS DE RÉPONSE</small><div id="cardAnswer"></div></div>
+     <div class="flash-face-foot">VERSO · PRENDS LE TEMPS DE COMPRENDRE</div>
+    </article>
+   </div>
+  </div>
+  <div class="actions">
+   <button class="secondary" id="prev">← Précédente</button>
+   <button class="primary" id="flip">Voir la réponse ↻</button>
+   <button class="secondary" id="next">Suivante →</button>
+  </div>
+  <div class="ratings" id="ratings" hidden>
+   <span>Comment as-tu retrouvé la réponse ?</span>
+   <button data-rate="again">À revoir · 1 j</button><button data-rate="hard">Difficile</button><button data-rate="good">Bien</button><button data-rate="easy">Facile</button>
+  </div>
+ </div>
+</section>
 <section class="view" id="reference"><div class="intro"><span class="eyebrow">BOÎTE À OUTILS</span><h1>Référentiel mathématique.</h1><p>Définitions et théorèmes essentiels à retrouver rapidement.</p></div><input id="refSearch" class="search-wide" placeholder="Rechercher une définition ou un théorème…"><div id="refs" class="ref-list"></div></section>
 <section class="view" id="progress"><div class="intro"><span class="eyebrow">RÉGULARITÉ & MAÎTRISE</span><h1>Ta progression.</h1><p>Construis des connaissances durables, sans chercher à aller vite.</p></div><div class="progress-grid"><article class="panel"><small>NOTIONS MAÎTRISÉES</small><div class="progress-number"><strong id="percent">0%</strong><span id="progressCount">0 notion sur 18</span></div><div class="bar big"><i id="progressBar"></i></div><p class="muted">Marque une notion comme maîtrisée après avoir su l'expliquer et résoudre un exercice sans aide.</p></article><article class="panel"><small>SÉANCES ENREGISTRÉES</small><strong class="big-number" id="sessions">0</strong><button class="secondary" id="addSession">+ Enregistrer une séance</button></article></div><div class="section-title"><h2>Révisions espacées</h2></div><div id="reviewSummary" class="review-summary"></div><div class="section-title"><h2>Suivi par notion</h2></div><div id="progressList" class="ref-list"></div><button id="reset" class="reset">Réinitialiser la progression locale</button></section>
 <footer>∑ MATHS2 <span>Comprendre · Démontrer · Maîtriser</span></footer></main><script>window.MathJax={tex:{inlineMath:[["\\(","\\)"],["$","$"]],displayMath:[["\\[","\\]"]],processEscapes:true},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]},startup:{typeset:false}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" onload="MathJax.typesetPromise().catch(function(e){console.error('MathJax',e)})"></script><script src="data.js?v=20261116-latex2"></script><script src="app.js?v=20261117-startup-guard1"></script>
