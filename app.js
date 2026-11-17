@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const KEY='maths2_progress_v3';let state;try{state=JSON.parse(localStorage.getItem(KEY)||'{}')}catch{state={}};if(!state||typeof state!=='object'||Array.isArray(state))state={};state.mastered=Array.isArray(state.mastered)?state.mastered:[];state.sessions=Number(state.sessions)||0;state.reviews=state.reviews&&typeof state.reviews==='object'?state.reviews:{};state.seen=Array.isArray(state.seen)?state.seen:[];
-let level='Tous',category='Toutes',dueOnly=false,cardIndex=0,flipped=false,flippingNow=false,currentTopic=null,visualFrame=0,raf=0;
+let level='Tous',category='Toutes',dueOnly=false,cardIndex=0,flipped=false,currentTopic=null,visualFrame=0,raf=0;
 const save=()=>{localStorage.setItem(KEY,JSON.stringify(state));stats()};
 function go(id){if(id==='exercises'&&typeof renderExercises==='function')renderExercises();document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.nav').forEach(b=>b.classList.toggle('active',b.dataset.view===id||(id==='topic'&&b.dataset.view==='learn')));$('#crumb').textContent=({home:"VUE D'ENSEMBLE",learn:'APPRENDRE',topic:'NOTION',exercises:'EXERCICES',cards:'FLASHCARDS',reference:'RÉFÉRENTIEL',progress:'PROGRESSION'})[id]||id.toUpperCase();$('#sidebar').classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});if(id==='progress')renderProgress();if(id!=='topic'&&raf){cancelAnimationFrame(raf);raf=0}}
 $$('[data-view]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));$$('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));$('#menu').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));$('#today').textContent=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'}).format(new Date()).toUpperCase();
@@ -108,7 +108,7 @@ function renderCard(){
   answer.textContent='Change de catégorie ou désactive le filtre « À réviser ».';
   $('#cardCount').textContent='0 carte';$('#cardCounter').textContent='Aucune carte';
   $('#cardStatus').textContent='Vide';$('#ratings').hidden=true;
-  $('#flip').disabled=true;inner.classList.remove('is-flipped');flipped=false;
+  $('#flip').disabled=true;inner.classList.remove('rotate-y-180');flipped=false;
   updateCardStats();return;
  }
  $('#flip').disabled=false;
@@ -122,7 +122,7 @@ function renderCard(){
  $('#cardCounter').textContent='Carte '+(cardIndex+1)+' sur '+list.length;
  $('#cardStatus').textContent=!review?'Non évaluée':due(c)?'À revoir':'Programmée · '+Math.max(1,Math.ceil((review.due-Date.now())/86400000))+' j';
  $('#ratings').hidden=!flipped;
- inner.classList.toggle('is-flipped',flipped);
+ inner.classList.toggle('rotate-y-180',flipped);
  $('#flip').textContent=flipped?'Masquer la réponse ↻':'Voir la réponse ↻';
  if(window.MathJax?.typesetPromise)window.MathJax.typesetPromise([question,answer]).catch(()=>{});
  updateCardStats();
@@ -136,9 +136,15 @@ function updateCardStats(){
  $('#cardScheduledCount').textContent=scheduled;
 }
 function flip(){
- if(!cardList().length||flippingNow)return;
- flippingNow=true;flipped=!flipped;renderCard();
- setTimeout(()=>{flippingNow=false},620);
+ const list=cardList();
+ if(!list.length)return;
+ const inner=$('#flashInner');
+ if(!inner)return;
+ flipped=!flipped;
+ // Même principe que dans -co : une seule classe CSS pilote le retournement.
+ inner.classList.toggle('rotate-y-180',flipped);
+ $('#ratings').hidden=!flipped;
+ $('#flip').textContent=flipped?'Masquer la réponse ↻':'Voir la réponse ↻';
 }
 $('#flashScene').addEventListener('click',flip);
 $('#flashScene').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}});
