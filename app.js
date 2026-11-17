@@ -23,9 +23,9 @@ function openCourseFromExercise(id){
 window.openMaths4Course=openCourseFromExercise;
 function exerciseMathHtml(value){
  const raw=String(value??'');
- // Les contenus déjà écrits en LaTeX sont conservés sans transformation.
+ // Les expressions LaTeX déjà balisées ne sont jamais reconverties.
  if(raw.includes('$')||raw.includes('\\(')||raw.includes('\\[')){
-  return raw.split('\n').map(line=>escapeExerciseHtml(line)).join('<br>');
+  return raw.split('\n').map(line=>line.replace(/</g,'&lt;').replace(/>/g,'&gt;')).join('<br>');
  }
  const symbols={
   'ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}',
@@ -41,30 +41,28 @@ function exerciseMathHtml(value){
  const subs={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','ₙ':'n','ₖ':'k','ₘ':'m','ₐ':'a','ₓ':'x','ᵢ':'i','ⱼ':'j'};
  const sups={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁺':'+','⁻':'-','ⁿ':'n','ˣ':'x','ᵃ':'a','ᵇ':'b','ᵉ':'e','ʰ':'h','ⁱ':'i'};
  const special=/[∀∃∈∉∅⊂⊆⊃⊇≤≥≠≈≡±∞∑Σ∫√∂∇→⇒↔×÷·⋅−ℝℕℤℚℂεηλμπθφωαβγδσρτ∼∝⊥∥‖⟨⟩′″₀-₉ₐₑₕₖₘₙₓᵢⱼ⁰-⁹⁺⁻ⁿˣᵃᵇᵉʰⁱ]/;
- function escapeExerciseHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
- }
- function convertToken(token){
-  let out='';
-  for(const c of Array.from(token)){
-   if(subs[c]!==undefined){out+='_{'+subs[c]+'}';continue;}
-   if(sups[c]!==undefined){out+='^{'+sups[c]+'}';continue;}
-   if(symbols[c]!==undefined){out+=symbols[c];continue;}
-   if(c==='#'){out+='\\#';continue;}
-   if(c==='$'){out+='\\$';continue;}
-   if(c==='%'){out+='\\%';continue;}
-   if(c==='&'){out+='\\&';continue;}
-   out+=c;
+ const escapeHtml=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+ const convert=token=>Array.from(token,c=>subs[c]!==undefined?'_{'+subs[c]+'}':sups[c]!==undefined?'^{'+sups[c]+'}':symbols[c]!==undefined?symbols[c]:c==='#'?'\\#':c==='$'?'\\$':c==='%'?'\\%':c==='&'?'\\&':c).join('');
+ const words=raw.split(/(\s+)/);
+ let out='',math='',braceDepth=0;
+ const flush=()=>{if(math){out+='<span class="math-token">\\('+math+'\\)</span>';math='';}};
+ for(const part of words){
+  if(!part)continue;
+  if(/^\s+$/.test(part)){
+   if(math)math+='\\ ';
+   else out+=part;
+   continue;
   }
-  return out;
+  const looksMath=special.test(part)||(/[0-9]/.test(part)&&/[=<>+\-−×÷*\/^_()\[\]{}:,|]/.test(part));
+  if(!math&&!looksMath){out+=escapeHtml(part);continue;}
+  if(math)math+='\\ ';
+  math+=convert(part);
+  for(const ch of part){if(ch==='{')braceDepth++;else if(ch==='}')braceDepth--;}
+  // Une accolade ouverte peut se refermer dans un mot suivant : ne jamais couper le groupe.
+  if(braceDepth<=0){braceDepth=0;flush();}
  }
- return raw.split(/(\s+)/).map(part=>{
-  if(!part||/^\s+$/.test(part))return part;
-  const looksMath=special.test(part)||(/[0-9]/.test(part)&&/[=<>+\-−×÷*\/^_()\[\]{}:,]/.test(part));
-  if(!looksMath)return escapeExerciseHtml(part);
-  // Les signes de ponctuation ordinaires restent valides dans le mode mathématique.
-  return '<span class="math-token">\\('+convertToken(part)+'\\)</span>';
- }).join('').replace(/\n/g,'<br>');
+ flush();
+ return out.replace(/\n/g,'<br>');
 }
 function renderExercises(){
  const query=($('#exerciseSearch')?.value||'').trim().toLocaleLowerCase('fr');
@@ -122,10 +120,8 @@ else if(visualType==='eigen'){line(x=>.6*x,-3,3,'#82b5ff',2);const l=visualValue
 }
 window.addEventListener('resize',()=>{if($('#mathCanvas')){resizeCanvas();drawVisual()}});
 function due(card){const r=state.reviews[card.id];return !r||r.due<=Date.now()}function cardList(){return CARDS.filter(c=>(category==='Toutes'||c.category===category)&&(!dueOnly||due(c)))}function cardMarkup(value){
- const s=String(value??'');
- const escaped=s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
- const hasMath=/[=<>≤≥≠±∞∑∫√∀∃ελημσπ∈∉⊂∩∪‖′ₙ₀₁₂³⁴⁵⁺⁻]|\\(?:frac|lim|sum|int|sqrt|mathbb|infty|langle|rangle|cdot|to|leq|geq|neq|forall|exists|begin|boxed|alpha|beta)/.test(s);
- return hasMath?'\\(\\displaystyle '+escaped+'\\)':escaped;
+ // Même rendu que les exercices : le texte reste du texte, seules les expressions passent en LaTeX.
+ return exerciseMathHtml(value);
 }
 function renderCard(){
  const list=cardList(),question=$('#cardQuestion'),answer=$('#cardAnswer'),scene=$('#flashScene');
