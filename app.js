@@ -23,19 +23,48 @@ function openCourseFromExercise(id){
 window.openMaths4Course=openCourseFromExercise;
 function exerciseMathHtml(value){
  const raw=String(value??'');
- // Les corrections avancées déjà écrites en LaTeX sont conservées.
- if(raw.includes(String.fromCharCode(36))||raw.includes('\\(')||raw.includes('\\['))return raw.split(String.fromCharCode(10)).join('<br>');
- const symbols={'ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}','ε':'\\varepsilon','η':'\\eta','λ':'\\lambda','μ':'\\mu','π':'\\pi','θ':'\\theta','φ':'\\varphi','ω':'\\omega','α':'\\alpha','β':'\\beta','γ':'\\gamma','σ':'\\sigma','ρ':'\\rho','τ':'\\tau','∀':'\\forall','∃':'\\exists','∈':'\\in','∉':'\\notin','∅':'\\varnothing','⊂':'\\subset','⊆':'\\subseteq','≤':'\\leq','≥':'\\geq','≠':'\\neq','≈':'\\approx','±':'\\pm','∞':'\\infty','∑':'\\sum','Σ':'\\sum','∫':'\\int','√':'\\sqrt','→':'\\to','⇒':'\\Rightarrow','×':'\\times','÷':'\\div','·':'\\cdot','⋅':'\\cdot','−':'-','∼':'\\sim','∝':'\\propto','⊥':'\\perp','∥':'\\parallel','‖':'\\|','⟨':'\\langle','⟩':'\\rangle','′':"'",'″':"''"};
+ // Les contenus déjà écrits en LaTeX sont conservés sans transformation.
+ if(raw.includes('$')||raw.includes('\\(')||raw.includes('\\[')){
+  return raw.split('\n').map(line=>escapeExerciseHtml(line)).join('<br>');
+ }
+ const symbols={
+  'ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}',
+  'ε':'\\varepsilon','η':'\\eta','λ':'\\lambda','μ':'\\mu','π':'\\pi','θ':'\\theta','φ':'\\varphi','ω':'\\omega',
+  'α':'\\alpha','β':'\\beta','γ':'\\gamma','δ':'\\delta','σ':'\\sigma','ρ':'\\rho','τ':'\\tau',
+  '∀':'\\forall','∃':'\\exists','∈':'\\in','∉':'\\notin','∅':'\\varnothing','⊂':'\\subset','⊆':'\\subseteq',
+  '⊃':'\\supset','⊇':'\\supseteq','≤':'\\leq','≥':'\\geq','≠':'\\neq','≈':'\\approx','≡':'\\equiv',
+  '±':'\\pm','∞':'\\infty','∑':'\\sum','Σ':'\\sum','∫':'\\int','√':'\\sqrt','∂':'\\partial','∇':'\\nabla',
+  '→':'\\to','⇒':'\\Rightarrow','↔':'\\leftrightarrow','×':'\\times','÷':'\\div','·':'\\cdot','⋅':'\\cdot',
+  '−':'-','∼':'\\sim','∝':'\\propto','⊥':'\\perp','∥':'\\parallel','‖':'\\|','⟨':'\\langle','⟩':'\\rangle',
+  '′':"'",'″':"''"
+ };
  const subs={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','ₙ':'n','ₖ':'k','ₘ':'m','ₐ':'a','ₓ':'x','ᵢ':'i','ⱼ':'j'};
  const sups={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁺':'+','⁻':'-','ⁿ':'n','ˣ':'x','ᵃ':'a','ᵇ':'b','ᵉ':'e','ʰ':'h','ⁱ':'i'};
- const special=/[∀∃∈∉∅⊂⊆≤≥≠≈±∞∑Σ∫√→⇒×÷·⋅−ℝℕℤℚℂεηλμπθφωαβγσρτ∼∝⊥∥‖⟨⟩′″₀-₉ₐₑₕₖₗₘₙₒₚₛₜᵢⱼᵣᵤᵥₓ⁰-⁹⁺⁻⁼⁽⁾ᵃᵇᵉʰⁱⁿˣ]/;
- const esc=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
- const convert=token=>Array.from(token,c=>subs[c]!==undefined?'_{'+subs[c]+'}':sups[c]!==undefined?'^{'+sups[c]+'}':(symbols[c]||c)).join('');
+ const special=/[∀∃∈∉∅⊂⊆⊃⊇≤≥≠≈≡±∞∑Σ∫√∂∇→⇒↔×÷·⋅−ℝℕℤℚℂεηλμπθφωαβγδσρτ∼∝⊥∥‖⟨⟩′″₀-₉ₐₑₕₖₘₙₓᵢⱼ⁰-⁹⁺⁻ⁿˣᵃᵇᵉʰⁱ]/;
+ function escapeExerciseHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+ }
+ function convertToken(token){
+  let out='';
+  for(const c of Array.from(token)){
+   if(subs[c]!==undefined){out+='_{'+subs[c]+'}';continue;}
+   if(sups[c]!==undefined){out+='^{'+sups[c]+'}';continue;}
+   if(symbols[c]!==undefined){out+=symbols[c];continue;}
+   if(c==='#'){out+='\\#';continue;}
+   if(c==='$'){out+='\\$';continue;}
+   if(c==='%'){out+='\\%';continue;}
+   if(c==='&'){out+='\\&';continue;}
+   out+=c;
+  }
+  return out;
+ }
  return raw.split(/(\s+)/).map(part=>{
   if(!part||/^\s+$/.test(part))return part;
   const looksMath=special.test(part)||(/[0-9]/.test(part)&&/[=<>+\-−×÷*\/^_()\[\]{}:,]/.test(part));
-  return looksMath?'<span class=\"math-token\">\\('+convert(part)+'\\)</span>':esc(part);
- }).join('').split(String.fromCharCode(10)).join('<br>');
+  if(!looksMath)return escapeExerciseHtml(part);
+  // Les signes de ponctuation ordinaires restent valides dans le mode mathématique.
+  return '<span class="math-token">\\('+convertToken(part)+'\\)</span>';
+ }).join('').replace(/\n/g,'<br>');
 }
 function renderExercises(){
  const query=($('#exerciseSearch')?.value||'').trim().toLocaleLowerCase('fr');
