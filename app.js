@@ -31,18 +31,18 @@ function exerciseMathHtml(value){
   'ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}',
   'ε':'\\varepsilon','η':'\\eta','λ':'\\lambda','μ':'\\mu','π':'\\pi','θ':'\\theta','φ':'\\varphi','ω':'\\omega',
   'α':'\\alpha','β':'\\beta','γ':'\\gamma','δ':'\\delta','σ':'\\sigma','ρ':'\\rho','τ':'\\tau',
-  '∀':'\\forall','∃':'\\exists{}','∈':'\\in','∉':'\\notin','∅':'\\varnothing','⊂':'\\subset','⊆':'\\subseteq',
-  '⊃':'\\supset','⊇':'\\supseteq','≤':'\\leq','≥':'\\geq','≠':'\\neq','≈':'\\approx','≡':'\\equiv',
+  '∀':'\\forall','∃':'\\exists{}','∈':'\\in{}','∉':'\\notin{}','∅':'\\varnothing','⊂':'\\subset{}','⊆':'\\subseteq{}',
+  '⊃':'\\supset{}','⊇':'\\supseteq{}','≤':'\\leq{}','≥':'\\geq{}','≠':'\\neq{}','≈':'\\approx{}','≡':'\\equiv',
   '±':'\\pm','∞':'\\infty','∑':'\\sum','Σ':'\\sum','∫':'\\int','√':'\\sqrt','∂':'\\partial','∇':'\\nabla',
-  '→':'\\to','⇒':'\\Rightarrow','↔':'\\leftrightarrow','×':'\\times','÷':'\\div','·':'\\cdot','⋅':'\\cdot',
-  '−':'-','∼':'\\sim','∝':'\\propto','⊥':'\\perp','∥':'\\parallel','‖':'\\|','⟨':'\\langle','⟩':'\\rangle',
+  '→':'\\to{}','⇒':'\\Rightarrow{}','↔':'\\leftrightarrow{}','×':'\\times{}','÷':'\\div{}','·':'\\cdot{}','⋅':'\\cdot{}',
+  '−':'-','∼':'\\sim{}','∝':'\\propto{}','⊥':'\\perp{}','∥':'\\parallel{}','‖':'\\|','⟨':'\\langle','⟩':'\\rangle',
   '′':"'",'″':"''"
  };
  const subs={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','ₙ':'n','ₖ':'k','ₘ':'m','ₐ':'a','ₓ':'x','ᵢ':'i','ⱼ':'j'};
  const sups={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁺':'+','⁻':'-','ⁿ':'n','ˣ':'x','ᵃ':'a','ᵇ':'b','ᵉ':'e','ʰ':'h','ⁱ':'i'};
  const special=/[∀∃∈∉∅⊂⊆⊃⊇≤≥≠≈≡±∞∑Σ∫√∂∇→⇒↔×÷·⋅−ℝℕℤℚℂεηλμπθφωαβγδσρτ∼∝⊥∥‖⟨⟩′″₀-₉ₐₑₕₖₘₙₓᵢⱼ⁰-⁹⁺⁻ⁿˣᵃᵇᵉʰⁱ]/;
  const escapeHtml=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
- const convert=token=>Array.from(token,c=>subs[c]!==undefined?'_{'+subs[c]+'}':sups[c]!==undefined?'^{'+sups[c]+'}':symbols[c]!==undefined?symbols[c]:c==='#'?'\\#':c==='$'?'\\$':c==='%'?'\\%':c==='&'?'\\&':c).join('');
+ const convert=token=>Array.from(token,c=>subs[c]!==undefined?'_{'+subs[c]+'}':sups[c]!==undefined?'^{'+sups[c]+'}':symbols[c]!==undefined?symbols[c]:c==='{'?'\\{':c==='}'?'\\}':c==='#'?'\\#':c==='$'?'\\$':c==='%'?'\\%':c==='&'?'\\&':c).join('');
  const words=raw.split(/(\s+)/);
  let out='',math='',braceDepth=0;
  const flush=()=>{if(math){out+='<span class="math-token">\\('+math+'\\)</span>';math='';}};
