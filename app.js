@@ -63,7 +63,15 @@ function renderExercises(){
  host.querySelectorAll('[data-ex-answer]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-answer-panel="'+b.dataset.exAnswer+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Voir la correction':'Masquer la correction';if(!el.hidden&&window.MathJax?.typesetPromise)window.MathJax.typesetPromise([el]).catch(()=>{});}}));
  host.querySelectorAll('[data-open-topic]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openCourseFromExercise(b.dataset.openTopic);}));
 }
-document.querySelectorAll('[data-ex-difficulty]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-ex-difficulty]').forEach(x=>x.classList.toggle('active',x===b));exerciseDifficulty=b.dataset.exDifficulty;renderExercises();}));
+// Gestion déléguée des niveaux : les boutons restent actifs même après le rerendu des exercices.
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-ex-difficulty]');
+ if(!b)return;
+ e.preventDefault();
+ document.querySelectorAll('[data-ex-difficulty]').forEach(x=>x.classList.toggle('active',x===b));
+ exerciseDifficulty=b.dataset.exDifficulty;
+ renderExercises();
+},true);
 $('#exerciseSearch').addEventListener('input',renderExercises);
 function renderQuiz(t){const bank=[{q:`Quelle affirmation correspond à la notion « ${t.title} » ?`,a:t.props[0],wrong:['Toute fonction est automatiquement dérivable.','Une limite peut prendre deux valeurs distinctes.','Le déterminant est toujours positif.']},{q:'Quel est le bon réflexe mathématique ?',a:'Vérifier les hypothèses avant d’appliquer un théorème.',wrong:['Appliquer une formule sans vérifier ses conditions.','Confondre réciproque et implication.','Remplacer une preuve par un exemple.']}];let qi=0;function draw(){const item=bank[qi],opts=[item.a,...item.wrong].sort(()=>Math.random()-.5);$('#quizBody').innerHTML=`<p>${item.q}</p><div class="quiz-options">${opts.map(o=>`<button class="secondary" data-answer="${encodeURIComponent(o)}">${o}</button>`).join('')}</div><div id="quizFeedback" class="feedback" hidden></div><button id="nextQuiz" class="primary" hidden>Question suivante →</button>`;$$('[data-answer]').forEach(b=>b.addEventListener('click',()=>{const ok=decodeURIComponent(b.dataset.answer)===item.a;$$('[data-answer]').forEach(x=>x.disabled=true);const f=$('#quizFeedback');f.hidden=false;f.textContent=ok?'Bonne réponse. '+item.a:'Pas tout à fait. '+item.a;f.style.borderLeftColor=ok?'#73cbb0':'#d9b46d';$('#nextQuiz').hidden=false}));$('#nextQuiz').addEventListener('click',()=>{qi=(qi+1)%bank.length;draw()})}draw()}
 function visualMarkup(type){return `<div class="topic-visual"><div class="section-title"><div><span class="eyebrow">VISUALISATION INTERACTIVE</span><h2>Manipuler pour comprendre</h2></div><span class="muted">Animation haute résolution</span></div><div class="visual-box"><canvas id="mathCanvas" width="1000" height="520" aria-label="Animation mathématique"></canvas><div class="visual-controls" id="visualControls"></div></div><p class="muted" id="visualCaption">Fais varier le paramètre et observe la représentation.</p></div>`}
