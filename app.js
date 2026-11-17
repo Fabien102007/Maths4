@@ -31,7 +31,7 @@ function exerciseMathHtml(value){
   'ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}',
   'ε':'\\varepsilon','η':'\\eta','λ':'\\lambda','μ':'\\mu','π':'\\pi','θ':'\\theta','φ':'\\varphi','ω':'\\omega',
   'α':'\\alpha','β':'\\beta','γ':'\\gamma','δ':'\\delta','σ':'\\sigma','ρ':'\\rho','τ':'\\tau',
-  '∀':'\\forall','∃':'\\exists','∈':'\\in','∉':'\\notin','∅':'\\varnothing','⊂':'\\subset','⊆':'\\subseteq',
+  '∀':'\\forall','∃':'\\exists{}','∈':'\\in','∉':'\\notin','∅':'\\varnothing','⊂':'\\subset','⊆':'\\subseteq',
   '⊃':'\\supset','⊇':'\\supseteq','≤':'\\leq','≥':'\\geq','≠':'\\neq','≈':'\\approx','≡':'\\equiv',
   '±':'\\pm','∞':'\\infty','∑':'\\sum','Σ':'\\sum','∫':'\\int','√':'\\sqrt','∂':'\\partial','∇':'\\nabla',
   '→':'\\to','⇒':'\\Rightarrow','↔':'\\leftrightarrow','×':'\\times','÷':'\\div','·':'\\cdot','⋅':'\\cdot',
@@ -120,7 +120,6 @@ else if(visualType==='eigen'){line(x=>.6*x,-3,3,'#82b5ff',2);const l=visualValue
 }
 window.addEventListener('resize',()=>{if($('#mathCanvas')){resizeCanvas();drawVisual()}});
 function due(card){const r=state.reviews[card.id];return !r||r.due<=Date.now()}function cardList(){return CARDS.filter(c=>(category==='Toutes'||c.category===category)&&(!dueOnly||due(c)))}function cardMarkup(value){
- // Même rendu que les exercices : le texte reste du texte, seules les expressions passent en LaTeX.
  return exerciseMathHtml(value);
 }
 function renderCard(){
