@@ -28,10 +28,10 @@ function exerciseMathHtml(value){
   return raw.split('\n').map(line=>line.replace(/</g,'&lt;').replace(/>/g,'&gt;')).join('<br>');
  }
  const symbols={
-  'ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}',
+  'ℝ':'\\mathbb{R}','ℓ':'\\ell','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}',
   'ε':'\\varepsilon','η':'\\eta','λ':'\\lambda','μ':'\\mu','π':'\\pi','θ':'\\theta','φ':'\\varphi','ω':'\\omega',
   'α':'\\alpha','β':'\\beta','γ':'\\gamma','δ':'\\delta','σ':'\\sigma','ρ':'\\rho','τ':'\\tau',
-  '∀':'\\forall','∃':'\\exists{}','∈':'\\in{}','∉':'\\notin{}','∅':'\\varnothing','⊂':'\\subset{}','⊆':'\\subseteq{}',
+  '∀':'\\forall','∃':'\\exists{}','∈':'\\in{}','∉':'\\notin{}','∅':'\\varnothing','∩':'\\cap{}','∪':'\\cup{}','⊕':'\\oplus{}','⊗':'\\otimes{}','⊂':'\\subset{}','⊆':'\\subseteq{}',
   '⊃':'\\supset{}','⊇':'\\supseteq{}','≤':'\\leq{}','≥':'\\geq{}','≠':'\\neq{}','≈':'\\approx{}','≡':'\\equiv',
   '±':'\\pm','∞':'\\infty','∑':'\\sum','Σ':'\\sum','∫':'\\int','√':'\\sqrt','∂':'\\partial','∇':'\\nabla',
   '→':'\\to{}','⇒':'\\Rightarrow{}','↔':'\\leftrightarrow{}','×':'\\times{}','÷':'\\div{}','·':'\\cdot{}','⋅':'\\cdot{}',
