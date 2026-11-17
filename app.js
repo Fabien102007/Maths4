@@ -23,105 +23,19 @@ function openCourseFromExercise(id){
 window.openMaths4Course=openCourseFromExercise;
 function exerciseMathHtml(value){
  const raw=String(value??'');
- // Les exercices avancés possèdent déjà leurs délimiteurs LaTeX : on les conserve tels quels.
- if(raw.includes('
- const query=($('#exerciseSearch')?.value||'').trim().toLocaleLowerCase('fr');
- const bank=[...(Array.isArray(EXERCISES)?EXERCISES:[])];
- const covered=new Set(bank.map(ex=>ex.topic));
- TOPICS.filter(t=>t.exercise&&!covered.has(t.id)).forEach((t,i)=>bank.push({id:'base-'+t.id,topic:t.id,difficulty:'Facile',question:t.exercise,hint:t.hint||'Repars de la définition et identifie le théorème utile.',answer:t.answer||'Rédige en rappelant les hypothèses et en justifiant chaque implication.'}));
- const rank={Facile:0,Intermédiaire:1,Avancé:2};
- const topics=new Map(TOPICS.map(t=>[t.id,t]));
- const items=bank.filter(ex=>(exerciseDifficulty==='Tous'||ex.difficulty===exerciseDifficulty))
-  .filter(ex=>{const t=topics.get(ex.topic);return (String(ex.question)+' '+String(t?.title||'')+' '+String(t?.chapter||'')).toLocaleLowerCase('fr').includes(query);})
-  .sort((a,b)=>(rank[a.difficulty]??9)-(rank[b.difficulty]??9)||String(a.id).localeCompare(String(b.id),undefined,{numeric:true}));
- const groups=[...new Set(items.map(ex=>topics.get(ex.topic)?.chapter||'Exercices complémentaires'))];
- const host=$('#exerciseList');if(!host)return;
- host.innerHTML=groups.map(chapter=>{
-  const group=items.filter(ex=>(topics.get(ex.topic)?.chapter||'Exercices complémentaires')===chapter);
-  const cards=group.map(ex=>{
-   const t=topics.get(ex.topic),id=String(ex.id).replace(/[^a-zA-Z0-9_-]/g,'-');
-   return `<article class="exercise-card exercise-item"><div class="exercise-meta"><span class="pill">${t?.level||'L1'}</span><span class="pill">${t?.category||'Mathématiques'}</span><span class="difficulty-pill difficulty-${rank[ex.difficulty]??0}">${ex.difficulty}</span></div><h3>${t?.title||'Exercice'}</h3><p class="exercise-prompt">${exerciseMathHtml(ex.question)}</p><div class="exercise-actions"><button class="secondary" data-ex-hint="${id}">Afficher un indice</button><button class="secondary" data-ex-answer="${id}">Voir la correction</button>${t?`<button class="primary" data-open-topic="${t.id}">Ouvrir le cours →</button>`:''}</div><div class="answer hint" data-hint-panel="${id}" hidden>${exerciseMathHtml(ex.hint||'Aucun indice disponible.')}</div><div class="answer" data-answer-panel="${id}" hidden>${exerciseMathHtml(ex.answer||'Aucune correction disponible.')}</div></article>`;
-  }).join('');
-  return `<section class="exercise-chapter"><div class="chapter-heading"><span class="eyebrow">ENTRAÎNEMENT PAR CHAPITRE</span><h2>${chapter}</h2><small>${group.length} exercice(s)</small></div><div class="exercise-cards">${cards}</div></section>`;
- }).join('')||'<p class="muted">Aucun exercice ne correspond à cette recherche.</p>';
- const count=$('#exerciseCount');if(count)count.textContent=`${items.length} exercice(s)`;
- if(window.MathJax?.typesetPromise) window.MathJax.typesetPromise([host]).catch(()=>{});
- host.querySelectorAll('[data-ex-hint]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-hint-panel="'+b.dataset.exHint+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Afficher un indice':'Masquer l’indice';}}));
- host.querySelectorAll('[data-ex-answer]').forEach(b=>b.addEventListener('click',()=>{const el=host.querySelector('[data-answer-panel="'+b.dataset.exAnswer+'"]');if(el){el.hidden=!el.hidden;b.textContent=el.hidden?'Voir la correction':'Masquer la correction';if(!el.hidden&&window.MathJax?.typesetPromise)window.MathJax.typesetPromise([el]).catch(()=>{});}}));
- host.querySelectorAll('[data-open-topic]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openCourseFromExercise(b.dataset.openTopic);}));
-}
-document.querySelectorAll('[data-ex-difficulty]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-ex-difficulty]').forEach(x=>x.classList.toggle('active',x===b));exerciseDifficulty=b.dataset.exDifficulty;renderExercises();}));
-$('#exerciseSearch').addEventListener('input',renderExercises);
-function renderQuiz(t){const bank=[{q:`Quelle affirmation correspond à la notion « ${t.title} » ?`,a:t.props[0],wrong:['Toute fonction est automatiquement dérivable.','Une limite peut prendre deux valeurs distinctes.','Le déterminant est toujours positif.']},{q:'Quel est le bon réflexe mathématique ?',a:'Vérifier les hypothèses avant d’appliquer un théorème.',wrong:['Appliquer une formule sans vérifier ses conditions.','Confondre réciproque et implication.','Remplacer une preuve par un exemple.']}];let qi=0;function draw(){const item=bank[qi],opts=[item.a,...item.wrong].sort(()=>Math.random()-.5);$('#quizBody').innerHTML=`<p>${item.q}</p><div class="quiz-options">${opts.map(o=>`<button class="secondary" data-answer="${encodeURIComponent(o)}">${o}</button>`).join('')}</div><div id="quizFeedback" class="feedback" hidden></div><button id="nextQuiz" class="primary" hidden>Question suivante →</button>`;$$('[data-answer]').forEach(b=>b.addEventListener('click',()=>{const ok=decodeURIComponent(b.dataset.answer)===item.a;$$('[data-answer]').forEach(x=>x.disabled=true);const f=$('#quizFeedback');f.hidden=false;f.textContent=ok?'Bonne réponse. '+item.a:'Pas tout à fait. '+item.a;f.style.borderLeftColor=ok?'#73cbb0':'#d9b46d';$('#nextQuiz').hidden=false}));$('#nextQuiz').addEventListener('click',()=>{qi=(qi+1)%bank.length;draw()})}draw()}
-function visualMarkup(type){return `<div class="topic-visual"><div class="section-title"><div><span class="eyebrow">VISUALISATION INTERACTIVE</span><h2>Manipuler pour comprendre</h2></div><span class="muted">Animation haute résolution</span></div><div class="visual-box"><canvas id="mathCanvas" width="1000" height="520" aria-label="Animation mathématique"></canvas><div class="visual-controls" id="visualControls"></div></div><p class="muted" id="visualCaption">Fais varier le paramètre et observe la représentation.</p></div>`}
-const VISUALS={sequence:{label:'Nombre de termes',min:2,max:30,value:10,caption:'uₙ = 1 + 1/n : les termes se rapprochent de 1.'},limit:{label:'x se rapproche de 1',min:0.1,max:4,value:2,caption:'La courbe y=x+1 se rapproche de 2 lorsque x tend vers 1.'},continuity:{label:'Position x',min:-3,max:3,value:0,caption:'La courbe est continue : les valeurs varient sans saut.'},derivative:{label:'Point de tangence',min:-2,max:2,value:1,caption:'La droite tangente approche localement la courbe.'},integral:{label:'Borne b',min:0.5,max:4,value:2,caption:'L’aire sous y=x² augmente avec la borne supérieure.'},taylor:{label:'Ordre du DL',min:0,max:8,value:4,caption:'Le polynôme de Taylor de exp approche la courbe près de 0.'},injectivity:{label:'Valeur x',min:-3,max:3,value:1,caption:'Pour x², x et −x ont la même image : la fonction n’est pas injective sur ℝ.'},determinant:{label:'Angle (degrés)',min:10,max:170,value:60,caption:'L’aire du parallélogramme vaut |det(u,v)|.'},schmidt:{label:'Angle entre v₁ et v₂',min:10,max:170,value:55,caption:'La projection de v₂ sur v₁ est retirée pour obtenir un vecteur orthogonal.'},fourier:{label:'Nombre d’harmoniques',min:1,max:15,value:5,caption:'La somme de Fourier approche progressivement une onde carrée.'},trig:{label:'Angle (degrés)',min:0,max:360,value:45,caption:'Le point du cercle a pour coordonnées (cos θ,sin θ).'},eigen:{label:'λ',min:-2,max:4,value:2,caption:'Une valeur propre est un facteur d’étirement dans une direction propre.'}};
-let visualType='sequence',visualValue=10;function startVisual(type){visualType=type;const conf=VISUALS[type];if(!conf)return;visualValue=conf.value;$('#visualControls').innerHTML=`<label>${conf.label} <input id="visualSlider" type="range" min="${conf.min}" max="${conf.max}" step="${type==='taylor'?1:0.1}" value="${conf.value}"><output id="visualOut">${conf.value}</output></label>`;$('#visualCaption').textContent=conf.caption;$('#visualSlider').addEventListener('input',e=>{visualValue=Number(e.target.value);$('#visualOut').textContent=visualValue;drawVisual()});resizeCanvas();drawVisual();if(raf)cancelAnimationFrame(raf);const tick=()=>{drawVisual();raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick)}
-function resizeCanvas(){const c=$('#mathCanvas');if(!c)return;const dpr=Math.min(window.devicePixelRatio||1,3),w=c.clientWidth||900,h=w*.52;c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);c.style.height=h+'px';const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0)}
-function drawVisual(){const c=$('#mathCanvas');if(!c)return;const ctx=c.getContext('2d'),w=c.clientWidth||900,h=w*.52;ctx.clearRect(0,0,w,h);ctx.fillStyle='#0c1725';ctx.fillRect(0,0,w,h);const ox=w*.5,oy=h*.52,s=Math.min(w/9,h/5);ctx.strokeStyle='#31445e';ctx.lineWidth=1;for(let x=0;x<w;x+=s){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=s){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}ctx.strokeStyle='#8ca4c3';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(15,oy);ctx.lineTo(w-15,oy);ctx.moveTo(ox,h-12);ctx.lineTo(ox,12);ctx.stroke();const X=x=>ox+x*s,Y=y=>oy-y*s;const line=(fn,a=-4,b=4,color='#83b5ff',width=3)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();for(let i=0;i<=500;i++){const x=a+(b-a)*i/500,y=fn(x);if(!Number.isFinite(y))continue;i?ctx.lineTo(X(x),Y(y)):ctx.moveTo(X(x),Y(y))}ctx.stroke()};const dot=(x,y,color='#f0c77a',r=5)=>{ctx.fillStyle=color;ctx.beginPath();ctx.arc(X(x),Y(y),r,0,Math.PI*2);ctx.fill()};
-if(visualType==='sequence'){line(()=>1,-4,4,'#e0b86d',2);const n=Math.round(visualValue);for(let k=1;k<=n;k++){const x=4*k/n-2,y=1+1/(k);dot(x,y,'#82b5ff',4);ctx.strokeStyle='#82b5ff55';ctx.beginPath();ctx.moveTo(X(x),Y(0));ctx.lineTo(X(x),Y(y));ctx.stroke()}ctx.fillStyle='#dce8f8';ctx.fillText('L = 1',20,24)}
-else if(visualType==='limit'){line(x=>x+1,-3,3);const x=1+(visualValue-2)*.4;dot(x,x+1);ctx.setLineDash([5,5]);ctx.strokeStyle='#e1bd75';ctx.beginPath();ctx.moveTo(X(x),Y(0));ctx.lineTo(X(x),Y(x+1));ctx.lineTo(ox,Y(x+1));ctx.stroke();ctx.setLineDash([])}
-else if(visualType==='continuity'){line(x=>Math.sin(x)+.2*x);const x=visualValue;dot(x,Math.sin(x)+.2*x)}
-else if(visualType==='derivative'){const a=visualValue,fa=a*a,fp=2*a;line(x=>x*x,-2.2,2.2);line(x=>fa+fp*(x-a),-2.2,2.2,'#e0b86d',2);dot(a,fa)}
-else if(visualType==='integral'){const b=visualValue;ctx.fillStyle='#4779c455';ctx.beginPath();ctx.moveTo(X(0),Y(0));for(let i=0;i<=180;i++){const x=b*i/180;ctx.lineTo(X(x),Y(x*x))}ctx.lineTo(X(b),Y(0));ctx.closePath();ctx.fill();line(x=>x*x,0,Math.max(2,b))}
-else if(visualType==='taylor'){const n=Math.round(visualValue);line(x=>Math.exp(x),-2,2,'#82b5ff',3);let fact=1;for(let i=1;i<=n;i++)fact*=i;line(x=>{let sum=0,f=1,p=1;for(let k=0;k<=n;k++){if(k>0){f*=k;p*=x}sum+=p/f}return sum},-1.8,1.8,'#e2b76f',3);ctx.fillStyle='#dce8f8';ctx.fillText('exp(x) et polynôme de Taylor',20,24)}
-else if(visualType==='injectivity'){line(x=>x*x,-2,2);const x=visualValue;dot(x,x*x);dot(-x,x*x,'#e0b86d');ctx.setLineDash([5,5]);ctx.strokeStyle='#e0b86d';ctx.beginPath();ctx.moveTo(X(x),Y(0));ctx.lineTo(X(x),Y(x*x));ctx.moveTo(X(-x),Y(0));ctx.lineTo(X(-x),Y(x*x));ctx.stroke();ctx.setLineDash([])}
-else if(visualType==='determinant'||visualType==='schmidt'){const a=visualValue*Math.PI/180;const u=[2,0],v=[2*Math.cos(a),2*Math.sin(a)];ctx.fillStyle='#4779c455';ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(u[0]),Y(u[1]));ctx.lineTo(X(u[0]+v[0]),Y(u[1]+v[1]));ctx.lineTo(X(v[0]),Y(v[1]));ctx.closePath();ctx.fill();ctx.strokeStyle='#82b5ff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(u[0]),Y(u[1]));ctx.stroke();ctx.strokeStyle='#e0b86d';ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(v[0]),Y(v[1]));ctx.stroke();if(visualType==='schmidt'){const proj=2*Math.cos(a);ctx.strokeStyle='#70d0b2';ctx.beginPath();ctx.moveTo(X(proj),Y(0));ctx.lineTo(X(v[0]),Y(v[1]));ctx.stroke();ctx.fillStyle='#dce8f8';ctx.fillText('Résidu orthogonal',20,24)}}
-else if(visualType==='fourier'){const n=Math.round(visualValue);line(x=>{let sum=0;for(let k=1;k<=n;k+=2)sum+=Math.sin(k*x)/k;return 4/Math.PI*sum},-Math.PI,Math.PI,'#82b5ff',3);line(x=>x<0?-1:1,-Math.PI,Math.PI,'#e0b86d',1.5)}
-else if(visualType==='trig'){ctx.strokeStyle='#82b5ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(ox,oy,s*1.7,0,Math.PI*2);ctx.stroke();const a=visualValue*Math.PI/180;const x=1.7*Math.cos(a),y=1.7*Math.sin(a);ctx.strokeStyle='#e0b86d';ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(X(x),Y(y));ctx.stroke();dot(x,y,'#e0b86d',6);ctx.fillStyle='#dce8f8';ctx.fillText(`cos θ = ${Math.cos(a).toFixed(2)} ; sin θ = ${Math.sin(a).toFixed(2)}`,20,24)}
-else if(visualType==='eigen'){line(x=>.6*x,-3,3,'#82b5ff',2);const l=visualValue;ctx.strokeStyle='#e0b86d';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(X(-1),Y(-l));ctx.lineTo(X(1),Y(l));ctx.stroke();dot(1,l,'#e0b86d')}
-}
-window.addEventListener('resize',()=>{if($('#mathCanvas')){resizeCanvas();drawVisual()}});
-function due(card){const r=state.reviews[card.id];return !r||r.due<=Date.now()}function cardList(){return CARDS.filter(c=>(category==='Toutes'||c.category===category)&&(!dueOnly||due(c)))}function cardMarkup(value){
- const s=String(value??'');
- const escaped=s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
- const hasMath=/[=<>≤≥≠±∞∑∫√∀∃ελημσπ∈∉⊂∩∪‖′ₙ₀₁₂³⁴⁵⁺⁻]|\\(?:frac|lim|sum|int|sqrt|mathbb|infty|langle|rangle|cdot|to|leq|geq|neq|forall|exists|begin|boxed|alpha|beta)/.test(s);
- return hasMath?'\\(\\displaystyle '+escaped+'\\)':escaped;
-}
-function renderCard(){
- const list=cardList(),host=$('#cardText');
- if(!list.length){
-  $('#cardMeta').textContent='RÉVISIONS TERMINÉES';$('#cardSide').textContent='BRAVO';
-  if(window.MathJax?.typesetClear)window.MathJax.typesetClear([host]);
-  host.textContent='Aucune carte à réviser dans ce filtre. Tu peux changer de catégorie ou désactiver le filtre.';
-  $('#cardCount').textContent='0 carte';$('#ratings').hidden=true;$('#flash').classList.remove('flipped');$('#flip').disabled=true;return;
- }
- $('#flip').disabled=false;cardIndex=(cardIndex+list.length)%list.length;
- const c=list[cardIndex];$('#cardMeta').textContent=c.category.toUpperCase()+' · '+c.level;
- $('#cardSide').textContent=flipped?'RÉPONSE':'QUESTION';
- if(window.MathJax?.typesetClear)window.MathJax.typesetClear([host]);
- host.innerHTML=cardMarkup(flipped?c.a:c.q);
- $('#cardCount').textContent=(cardIndex+1)+' / '+list.length;
- $('#flash').classList.toggle('flipped',flipped);$('#ratings').hidden=!flipped;
- if(window.MathJax?.typesetPromise)window.MathJax.typesetPromise([host]).catch(()=>{});
-}
-function flip(){if(!cardList().length||flippingNow)return;flippingNow=true;const flash=$('#flash');flash.classList.add('flip-out');setTimeout(()=>{flipped=!flipped;renderCard();flash.classList.remove('flip-out');flash.classList.add('flip-in');setTimeout(()=>{flash.classList.remove('flip-in');flippingNow=false},420)},210)}
-$('#flash').addEventListener('click',flip);$('#flip').addEventListener('click',flip);
-$('#prev').addEventListener('click',()=>{cardIndex--;flipped=false;renderCard()});
-$('#next').addEventListener('click',()=>{cardIndex++;flipped=false;renderCard()});
-$$('[data-cat]').forEach(b=>b.addEventListener('click',()=>{$$('[data-cat]').forEach(x=>x.classList.remove('active'));b.classList.add('active');category=b.dataset.cat;cardIndex=0;flipped=false;renderCard()}));
-$('#dueToggle').addEventListener('click',()=>{dueOnly=!dueOnly;$('#dueToggle').classList.toggle('active',dueOnly);cardIndex=0;flipped=false;renderCard()});
-$$('[data-rate]').forEach(b=>b.addEventListener('click',()=>{const c=cardList()[cardIndex];if(!c)return;const old=state.reviews[c.id]||{interval:0,repetitions:0};const rate=b.dataset.rate;let days=rate==='again'?1:rate==='hard'?Math.max(2,Math.round((old.interval||1)*1.5)):rate==='good'?[1,3,7,14,30][Math.min(old.repetitions||0,4)]:Math.max(7,(old.interval||3)*2);state.reviews[c.id]={interval:days,repetitions:rate==='again'?0:(old.repetitions||0)+1,due:Date.now()+days*86400000,last:Date.now(),rating:rate};save();cardIndex=0;flipped=false;renderCard()}));
-function renderRefs(){const q=$('#refSearch').value.toLocaleLowerCase('fr');$('#refs').innerHTML=REFERENCES.filter(r=>(`${r.title} ${r.definition} ${r.props.join(' ')}`).toLocaleLowerCase('fr').includes(q)).map((r,i)=>`<article class="ref-item"><button class="ref-head"><span>∴</span><strong>${r.title}</strong><span class="pill">${r.level}</span><span>⌄</span></button><div class="ref-body"><p>${r.definition}</p><div class="formula">${r.formula}</div><ul>${r.props.map(p=>`<li>${p}</li>`).join('')}</ul></div></article>`).join('');$$('.ref-head').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')))}$('#refSearch').addEventListener('input',renderRefs);
-function renderProgress(){const dueCount=CARDS.filter(due).length,reviewed=CARDS.length-dueCount;$('#reviewSummary').innerHTML=`<article><strong>${dueCount}</strong><span>Cartes à revoir maintenant</span></article><article><strong>${reviewed}</strong><span>Cartes déjà planifiées</span></article><article><strong>${CARDS.length}</strong><span>Total de cartes</span></article>`;$('#progressList').innerHTML=TOPICS.map(t=>`<div class="progress-row"><span>${t.title}</span><small>${t.level} · ${t.category}</small><button data-master="${t.id}">${state.mastered.includes(t.id)?'Maîtrisée ✓':'À travailler'}</button></div>`).join('');$$('[data-master]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.master;state.mastered=state.mastered.includes(id)?state.mastered.filter(x=>x!==id):[...state.mastered,id];save();renderProgress();renderTopics()}))}
-$('#addSession').addEventListener('click',()=>{state.sessions++;save();renderProgress()});$('#reset').addEventListener('click',()=>{if(confirm('Effacer la progression enregistrée sur cet appareil ?')){state={mastered:[],sessions:0,reviews:{},seen:[]};save();renderProgress();renderTopics();renderCard()}});
-renderTopics();renderExercises();renderCard();renderRefs();stats();window.__MATHS2_APP_READY__=true;
-})();
-)||raw.includes('\\(')||raw.includes('\\['))return raw.replace(/\n/g,'<br>');
- const symbols={'ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}','ε':'\\varepsilon','η':'\\eta','λ':'\\lambda','μ':'\\mu','π':'\\pi','θ':'\\theta','φ':'\\varphi','ω':'\\omega','α':'\\alpha','β':'\\beta','γ':'\\gamma','σ':'\\sigma','ρ':'\\rho','τ':'\\tau','Ω':'\\Omega','∀':'\\forall','∃':'\\exists','∈':'\\in','∉':'\\notin','∅':'\\varnothing','⊂':'\\subset','⊆':'\\subseteq','⊃':'\\supset','⊇':'\\supseteq','∩':'\\cap','∪':'\\cup','≤':'\\leq','≥':'\\geq','≠':'\\neq','≈':'\\approx','≡':'\\equiv','±':'\\pm','∞':'\\infty','∑':'\\sum','Σ':'\\sum','∫':'\\int','√':'\\sqrt','∂':'\\partial','∇':'\\nabla','→':'\\to','⇒':'\\Rightarrow','↔':'\\leftrightarrow','×':'\\times','÷':'\\div','·':'\\cdot','⋅':'\\cdot','−':'-','∼':'\\sim','∝':'\\propto','⊥':'\\perp','∥':'\\parallel','‖':'\\|','⟨':'\\langle','⟩':'\\rangle','′':"'",'″':"''"};
- const subs={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','ₐ':'a','ₑ':'e','ₕ':'h','ᵢ':'i','ⱼ':'j','ₖ':'k','ₗ':'l','ₘ':'m','ₙ':'n','ₒ':'o','ₚ':'p','ᵣ':'r','ₛ':'s','ₜ':'t','ᵤ':'u','ᵥ':'v','ₓ':'x'};
- const sups={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁺':'+','⁻':'-','⁼':'=','⁽':'(','⁾':')','ᵃ':'a','ᵇ':'b','ᶜ':'c','ᵈ':'d','ᵉ':'e','ᶠ':'f','ᵍ':'g','ʰ':'h','ⁱ':'i','ʲ':'j','ᵏ':'k','ˡ':'l','ᵐ':'m','ⁿ':'n','ᵒ':'o','ᵖ':'p','ʳ':'r','ˢ':'s','ᵗ':'t','ᵘ':'u','ᵛ':'v','ʷ':'w','ˣ':'x','ʸ':'y','ᶻ':'z'};
- const special=/[∀∃∈∉∅⊂⊆⊃⊇∩∪≤≥≠≈≡±∞∑Σ∫√∂∇→⇒↔×÷·⋅−ℝℕℤℚℂεηλμπθφωαβγσρτΩ∼∝⊥∥‖⟨⟩′″₀-₉ₐₑₕₖₗₘₙₒₚₛₜᵢⱼᵣᵤᵥₓ⁰-⁹⁺⁻⁼⁽⁾ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖʳˢᵗᵘᵛʷˣʸᶻ]/;
- const esc=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
- const convert=token=>{
-  let out='';
-  for(const c of token){if(subs[c]!==undefined)out+='_{'+subs[c]+'}';else if(sups[c]!==undefined)out+='^{'+sups[c]+'}';else out+=symbols[c]||c;}
-  return out;
- };
- return raw.split(/(\s+)/).map(part=>{
-  if(!part||/^\s+$/.test(part))return part;
-  const looksMath=special.test(part)||(/[0-9]/.test(part)&&/[=<>+\-−×÷*/^_()[\]{}:,]/.test(part))||/^(sin|cos|tan|ln|log|exp|det|Ker|Im|Vect|diag|lim|proj|dim)\b/.test(part);
-  return looksMath?'<span class="math-token">\\('+convert(part)+'\\)</span>':esc(part);
- }).join('').replace(/\n/g,'<br>');
+ // Les corrections avancées déjà écrites en LaTeX sont conservées.
+ if(raw.includes(String.fromCharCode(36))||raw.includes('\\(')||raw.includes('\\['))return raw.split(String.fromCharCode(10)).join('<br>');
+ const symbols={'ℝ':'\\mathbb{R}','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}','ε':'\\varepsilon','η':'\\eta','λ':'\\lambda','μ':'\\mu','π':'\\pi','θ':'\\theta','φ':'\\varphi','ω':'\\omega','α':'\\alpha','β':'\\beta','γ':'\\gamma','σ':'\\sigma','ρ':'\\rho','τ':'\\tau','∀':'\\forall','∃':'\\exists','∈':'\\in','∉':'\\notin','∅':'\\varnothing','⊂':'\\subset','⊆':'\\subseteq','≤':'\\leq','≥':'\\geq','≠':'\\neq','≈':'\\approx','±':'\\pm','∞':'\\infty','∑':'\\sum','Σ':'\\sum','∫':'\\int','√':'\\sqrt','→':'\\to','⇒':'\\Rightarrow','×':'\\times','÷':'\\div','·':'\\cdot','⋅':'\\cdot','−':'-','∼':'\\sim','∝':'\\propto','⊥':'\\perp','∥':'\\parallel','‖':'\\|','⟨':'\\langle','⟩':'\\rangle','′':\"'\",'″':\"''\"};
+ const subs={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','ₙ':'n','ₖ':'k','ₘ':'m','ₐ':'a','ₓ':'x','ᵢ':'i','ⱼ':'j'};
+ const sups={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁺':'+','⁻':'-','ⁿ':'n','ˣ':'x','ᵃ':'a','ᵇ':'b','ᵉ':'e','ʰ':'h','ⁱ':'i'};
+ const special=/[∀∃∈∉∅⊂⊆≤≥≠≈±∞∑Σ∫√→⇒×÷·⋅−ℝℕℤℚℂεηλμπθφωαβγσρτ∼∝⊥∥‖⟨⟩′″₀-₉ₐₑₕₖₗₘₙₒₚₛₜᵢⱼᵣᵤᵥₓ⁰-⁹⁺⁻⁼⁽⁾ᵃᵇᵉʰⁱⁿˣ]/;
+ const esc=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
+ const convert=token=>Array.from(token,c=>subs[c]!==undefined?'_{'+subs[c]+'}':sups[c]!==undefined?'^{'+sups[c]+'}':(symbols[c]||c)).join('');
+ return raw.split(/(\\s+)/).map(part=>{
+  if(!part||/^\\s+$/.test(part))return part;
+  const looksMath=special.test(part)||(/[0-9]/.test(part)&&/[=<>+\\-−×÷*/^_()[\\]{}:,]/.test(part));
+  return looksMath?'<span class=\"math-token\">\\\\('+convert(part)+'\\\\)</span>':esc(part);
+ }).join('').split(String.fromCharCode(10)).join('<br>');
 }
 function renderExercises(){
  const query=($('#exerciseSearch')?.value||'').trim().toLocaleLowerCase('fr');
