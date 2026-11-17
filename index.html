@@ -147,8 +147,7 @@
     const p=node.parentElement;
     if(!p||p.closest('script,style,textarea,pre,code,button,.math-token,.MathJax,.MathJax_Preview,mjx-container'))return NodeFilter.FILTER_REJECT;
     const s=node.nodeValue||'';
-    if(!s.trim()||s.includes('\\(')||s.includes('\\[')||s.includes('</html>
-))return NodeFilter.FILTER_REJECT;
+    if(!s.trim()||s.includes('\\(')||s.includes('\\['))return NodeFilter.FILTER_REJECT;
     return mathChar.test(s)||/[=<>]/.test(s)&&/[0-9]/.test(s)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
    }
   });
@@ -182,5 +181,26 @@
  }
  window.addEventListener('load',start,{once:true});
 })();
+</script>
+
+<script>
+/* Filtre de secours des exercices : fonctionne même si le rendu principal est interrompu. */
+document.addEventListener('click',function(e){
+ const b=e.target.closest('#exerciseDifficulty [data-ex-difficulty]');
+ if(!b)return;
+ const level=b.dataset.exDifficulty;
+ document.querySelectorAll('#exerciseDifficulty [data-ex-difficulty]').forEach(x=>x.classList.toggle('active',x===b));
+ const chapters=[...document.querySelectorAll('#exerciseList .exercise-chapter')];
+ let count=0;
+ document.querySelectorAll('#exerciseList .exercise-item').forEach(card=>{
+  const pill=card.querySelector('.difficulty-pill');
+  const visible=level==='Tous'||(pill&&pill.textContent.trim()===level);
+  card.hidden=!visible;
+  if(visible)count++;
+ });
+ chapters.forEach(ch=>{ch.hidden=!ch.querySelector('.exercise-item:not([hidden])');});
+ const counter=document.querySelector('#exerciseCount');
+ if(counter)counter.textContent=count+' exercice(s)';
+},false);
 </script>
 </body></html>
