@@ -138,3 +138,34 @@ mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
 #ratings button{font-weight:700}
 @media(max-width:650px){.flash-scene{height:390px}.flash-face{padding:19px}.flash-hint{font-size:8px}.card-tools{padding:12px}.card-stats{gap:6px}.card-stats article{padding:9px 5px}}
 @media(prefers-reduced-motion:reduce){.flash-inner{transition:none}}
+
+
+/* Adaptation renforcée aux petits écrans et aux téléphones tactiles, même lorsque le zoom change. */
+html,body{width:100%;min-width:0;overflow-x:hidden}
+main,.main-content{min-width:0;width:auto;max-width:100%;box-sizing:border-box}
+.view,.panel,.detail-block,.exercise-card,.ref-item,.topic-card{min-width:0;max-width:100%}
+p,li,strong,h1,h2,h3{overflow-wrap:anywhere}
+mjx-container{max-width:100%!important}
+@media(max-width:1100px){
+  main{padding-left:clamp(12px,3vw,28px);padding-right:clamp(12px,3vw,28px)}
+  .topic-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+  .stats{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
+}
+@media(max-width:760px),(pointer:coarse) and (hover:none){
+  body .sidebar{position:fixed;inset:0 auto 0 0;width:min(290px,86vw);height:100dvh;max-height:100dvh;transform:translateX(-105%);z-index:1000;overflow-y:auto}
+  body .sidebar.open{transform:translateX(0)}
+  body main{margin-left:0!important;width:100%;max-width:100%;padding-left:clamp(10px,3.5vw,18px)!important;padding-right:clamp(10px,3.5vw,18px)!important}
+  body .menu{display:inline-flex!important;flex:0 0 42px;width:42px;height:42px;align-items:center;justify-content:center}
+  .topbar{min-width:0;gap:clamp(6px,2vw,14px)}
+  .topbar>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .view{padding-top:clamp(16px,4vw,26px)}
+  .hero{padding:clamp(18px,5vw,28px);min-height:0}
+  .hero h1{font-size:clamp(25px,7vw,35px)}
+  .intro h1{font-size:clamp(24px,6vw,30px)}
+  .detail-columns,.home-grid,.progress-grid{grid-template-columns:minmax(0,1fr)}
+  .toolbar{min-width:0}
+  .toolbar input,.search-wide{width:100%;min-width:0}
+  .filters{max-width:100%}
+  .flash-scene{height:clamp(300px,95vw,390px)}
+  .flash-face{padding:clamp(14px,4vw,22px)}
+}
