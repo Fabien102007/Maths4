@@ -202,3 +202,31 @@ mjx-container{max-width:100%!important}
 .atelier-panel button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:900px){.atelier-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:520px){.atelier-notice{display:block}.atelier-notice strong{display:block;margin-bottom:4px}.atelier-actions>*{max-width:100%}.atelier-panel h2{font-size:19px}}
+
+
+/* Atelier IA Maths4 — dialogue, sélection lisible et correction manuscrite */
+.atelier-grid-ai{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.atelier-panel{min-width:0}
+.atelier-search{width:100%;box-sizing:border-box;background:#162638;border:1px solid #3b536d;border-radius:11px;padding:12px;color:#edf3fa}
+.atelier-select{width:100%;min-width:0;min-height:48px;max-height:220px;overflow-y:auto;appearance:none;background-color:#111e2d;background-image:linear-gradient(45deg,transparent 50%,#a9cfff 50%),linear-gradient(135deg,#a9cfff 50%,transparent 50%);background-position:calc(100% - 19px) 21px,calc(100% - 13px) 21px;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding:12px 36px 12px 13px;border:1px solid #46617e;border-radius:11px;color:#edf3fa;font:600 13px Manrope,system-ui,sans-serif}
+.atelier-select option{background:#142337;color:#eaf2fc;padding:9px}
+.atelier-select optgroup{background:#1b3048;color:#a9cbf2;font-weight:800}
+.coach-chat{display:flex;flex-direction:column;gap:10px;max-height:420px;min-height:155px;overflow-y:auto;margin-top:14px;padding:13px;border:1px solid #30465f;border-radius:13px;background:#0f1b29}
+.coach-welcome{padding:8px;color:#dce8f8;line-height:1.65;font-size:13px}
+.coach-welcome p{margin:7px 0 0;color:#a8bad0}
+.coach-message{max-width:94%;padding:11px 13px;border-radius:12px;font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.coach-message.user{align-self:flex-end;background:#294969;border:1px solid #45698e;color:#f0f6ff;border-bottom-right-radius:4px}
+.coach-message.assistant{align-self:flex-start;background:#1a2c40;border:1px solid #344d68;color:#e2edf9;border-bottom-left-radius:4px}
+.coach-message .message-role{display:block;margin-bottom:5px;font:700 9px 'DM Mono',monospace;letter-spacing:1px;color:#9fc5f1}
+.coach-message p{margin:4px 0}
+.coach-message mjx-container{max-width:100%;overflow-x:auto}
+.coach-actions{display:flex;gap:8px;flex-wrap:wrap}
+.coach-actions button{margin:0}
+.atelier-footnote{margin-top:10px;color:#91a5bd;font-size:11px;line-height:1.6}
+.text-button{margin-top:12px;padding:5px 0;background:none;border:0;color:#9ebce0;text-decoration:underline;font-size:11px;cursor:pointer}
+.atelier-feedback{white-space:normal;overflow-wrap:anywhere}
+.atelier-feedback p{line-height:1.7}
+#copyAnalyse{width:100%;margin-top:12px}
+#copyPreview img{width:100%;object-fit:contain}
+@media(max-width:900px){.atelier-grid-ai{grid-template-columns:minmax(0,1fr)}.coach-chat{max-height:360px}}
+@media(max-width:520px){.coach-actions{display:grid;grid-template-columns:1fr}.coach-actions button{width:100%;min-height:43px}.atelier-select{font-size:12px}}
