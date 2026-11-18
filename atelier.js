@@ -29,7 +29,7 @@ function filteredBank(q=''){
   return !query||(exerciseTitle(ex)+' '+(t?.category||'')+' '+(ex.difficulty||'')+' '+(ex.question||'')).toLocaleLowerCase('fr').includes(query);
  }).sort((a,b)=>{
   const ia=topics.findIndex(t=>String(t.id)===String(a.topic));
-  const ib=(window.TOPICS||[]).findIndex(t=>String(t.id)===String(b.topic));
+  const ib=topics.findIndex(t=>String(t.id)===String(b.topic));
   const rank={Facile:0,'Intermédiaire':1,Avancé:2};
   return ia-ib||(rank[a.difficulty]??9)-(rank[b.difficulty]??9);
  });
