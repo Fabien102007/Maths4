@@ -24,8 +24,17 @@ window.openMaths4Course=openCourseFromExercise;
 function exerciseMathHtml(value){
  const raw=String(value??'');
  // Les expressions LaTeX déjà balisées ne sont jamais reconverties.
- if(raw.includes('$')||raw.includes('\\(')||raw.includes('\\[')){
-  return raw.split('\n').map(line=>line.replace(/</g,'&lt;').replace(/>/g,'&gt;')).join('<br>');
+ if(raw.includes('$')||raw.includes('\\\\(')||raw.includes('\\\\[')){
+  // Les corrections mélangent du Markdown léger (**gras**) et du LaTeX.
+  const bold=[];
+  let safe=raw.replace(/\\*\\*([\\s\\S]+?)\\*\\*/g,(_,content)=>{
+   const token='@@MATHSBOLD'+bold.length+'@@';
+   bold.push('<strong>'+content.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</strong>');
+   return token;
+  });
+  safe=safe.split('\\n').map(line=>line.replace(/</g,'&lt;').replace(/>/g,'&gt;')).join('<br>');
+  bold.forEach((html,i)=>{safe=safe.replace('@@MATHSBOLD'+i+'@@',html)});
+  return safe;
  }
  const symbols={
   'ℝ':'\\mathbb{R}','ℓ':'\\ell','ℕ':'\\mathbb{N}','ℤ':'\\mathbb{Z}','ℚ':'\\mathbb{Q}','ℂ':'\\mathbb{C}',
@@ -184,7 +193,7 @@ $$('[data-rate]').forEach(b=>b.addEventListener('click',e=>{
  state.reviews[c.id]={interval:days,repetitions:rate==='again'?0:(old.repetitions||0)+1,due:Date.now()+days*86400000,last:Date.now(),rating:rate};
  save();cardIndex=0;flipped=false;renderCard();
 }));
-function renderRefs(){const q=$('#refSearch').value.toLocaleLowerCase('fr');$('#refs').innerHTML=REFERENCES.filter(r=>(`${r.title} ${r.definition} ${r.props.join(' ')}`).toLocaleLowerCase('fr').includes(q)).map((r,i)=>`<article class="ref-item"><button class="ref-head"><span>∴</span><strong>${r.title}</strong><span class="pill">${r.level}</span><span>⌄</span></button><div class="ref-body"><p>${r.definition}</p><div class="formula">${r.formula}</div><ul>${r.props.map(p=>`<li>${p}</li>`).join('')}</ul></div></article>`).join('');$$('.ref-head').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')))}$('#refSearch').addEventListener('input',renderRefs);
+function renderRefs(){const q=$('#refSearch').value.toLocaleLowerCase('fr');const available=REFERENCES.filter(r=>r.level!=='L1');$('#refs').innerHTML=available.filter(r=>(`${r.title} ${r.definition} ${r.props.join(' ')}`).toLocaleLowerCase('fr').includes(q)).map(r=>`<article class="ref-item"><button class="ref-head"><span>∴</span><strong>${r.title}</strong><span class="pill">${r.level}</span><span>⌄</span></button><div class="ref-body"><p>${exerciseMathHtml(r.definition)}</p><div class="formula">${exerciseMathHtml(r.formula)}</div><ul>${r.props.map(p=>`<li>${exerciseMathHtml(p)}</li>`).join('')}</ul></div></article>`).join('')||'<p class="muted">Aucune définition de niveau L2 ne correspond à cette recherche.</p>';$$('.ref-head').forEach(b=>b.addEventListener('click',()=>{b.parentElement.classList.toggle('open');if(b.parentElement.classList.contains('open')&&window.MathJax?.typesetPromise)window.MathJax.typesetPromise([b.parentElement]).catch(error=>console.error('Erreur MathJax dans le référentiel:',error));}));if(window.MathJax?.typesetPromise)window.MathJax.typesetPromise([$('#refs')]).catch(error=>console.error('Erreur MathJax dans le référentiel:',error));}$('#refSearch').addEventListener('input',renderRefs);
 function renderProgress(){const dueCount=CARDS.filter(due).length,reviewed=CARDS.length-dueCount;$('#reviewSummary').innerHTML=`<article><strong>${dueCount}</strong><span>Cartes à revoir maintenant</span></article><article><strong>${reviewed}</strong><span>Cartes déjà planifiées</span></article><article><strong>${CARDS.length}</strong><span>Total de cartes</span></article>`;$('#progressList').innerHTML=TOPICS.map(t=>`<div class="progress-row"><span>${t.title}</span><small>${t.level} · ${t.category}</small><button data-master="${t.id}">${state.mastered.includes(t.id)?'Maîtrisée ✓':'À travailler'}</button></div>`).join('');$$('[data-master]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.master;state.mastered=state.mastered.includes(id)?state.mastered.filter(x=>x!==id):[...state.mastered,id];save();renderProgress();renderTopics()}))}
 $('#addSession').addEventListener('click',()=>{state.sessions++;save();renderProgress()});$('#reset').addEventListener('click',()=>{if(confirm('Effacer la progression enregistrée sur cet appareil ?')){state={mastered:[],sessions:0,reviews:{},seen:[]};save();renderProgress();renderTopics();renderCard()}});
 renderTopics();renderExercises();renderCard();renderRefs();stats();window.__MATHS2_APP_READY__=true;
