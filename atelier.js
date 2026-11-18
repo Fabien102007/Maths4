@@ -1,112 +1,141 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
-const escapeHtml=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const storeKey='maths4_reasoning_workshop_v1';
-const saved=(()=>{try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch{return {}}})();
-let selected=null, imageFile=null, ocrBusy=false;
-const save=()=>{try{localStorage.setItem(storeKey,JSON.stringify({selectedId:$('#coachExercise')?.value||'',coachWork:$('#coachWork')?.value||'',copyText:$('#copyText')?.value||''}))}catch{}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const endpoint=()=>String(window.MATHS4_AI_ENDPOINT||'').trim();
+const storeKey='maths4_ai_workshop_v2';
+const previous=(()=>{try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch{return {}}})();
+let selected=null,photo=null,busy=false,history=[];
+const persist=()=>{try{localStorage.setItem(storeKey,JSON.stringify({exerciseId:$('#coachExercise')?.value||'',history:history.slice(-14),copyText:$('#copyText')?.value||''}))}catch{}};
+const setStatus=(id,message)=>{const el=$(id);if(el)el.textContent=message};
 const typeset=el=>{if(window.MathJax?.typesetPromise)window.MathJax.typesetPromise([el]).catch(()=>{})};
-function getBank(){
- const bank=Array.isArray(EXERCISES)?[...EXERCISES]:[];
- const covered=new Set(bank.map(x=>String(x.topic)));
- (Array.isArray(TOPICS)?TOPICS:[]).filter(t=>t.exercise&&!covered.has(String(t.id))).forEach(t=>bank.push({id:'topic-'+t.id,topic:t.id,difficulty:'Facile',question:t.exercise,hint:t.hint||'Repars de la définition et identifie les hypothèses utiles.',answer:t.answer||'Rédige une preuve en rappelant les hypothèses et en justifiant chaque implication.'}));
- return bank;
+function exerciseBank(){
+ const all=Array.isArray(window.EXERCISES)?window.EXERCISES:[];
+ const items=all.map(x=>({...x}));
+ const seen=new Set(items.map(x=>String(x.topic)));
+ (Array.isArray(window.TOPICS)?window.TOPICS:[]).forEach(t=>{
+  if(t.exercise&&!seen.has(String(t.id)))items.push({id:'topic-'+t.id,topic:t.id,difficulty:'Facile',question:t.exercise,hint:t.hint||'',answer:t.answer||''});
+ });
+ return items;
 }
-const bank=getBank();
-function topicFor(ex){return (Array.isArray(TOPICS)?TOPICS:[]).find(t=>String(t.id)===String(ex.topic))}
-function initExercises(){
+const bank=exerciseBank();
+const topicMap=new Map((window.TOPICS||[]).map(t=>[String(t.id),t]));
+function exerciseTitle(ex){return topicMap.get(String(ex.topic))?.title||ex.chapter||'Exercice'}
+function filteredBank(q=''){
+ const query=q.trim().toLocaleLowerCase('fr');
+ return bank.filter(ex=>{
+  const t=topicMap.get(String(ex.topic));
+  return !query||(exerciseTitle(ex)+' '+(t?.category||'')+' '+(ex.difficulty||'')+' '+(ex.question||'')).toLocaleLowerCase('fr').includes(query);
+ }).sort((a,b)=>{
+  const ia=(window.TOPICS||[]).findIndex(t=>String(t.id)===String(a.topic));
+  const ib=(window.TOPICS||[]).findIndex(t=>String(t.id)===String(b.topic));
+  const rank={Facile:0,'Intermédiaire':1,Avancé:2};
+  return ia-ib||(rank[a.difficulty]??9)-(rank[b.difficulty]??9);
+ });
+}
+function renderOptions(){
  const select=$('#coachExercise');if(!select)return;
+ const old=select.value||previous.exerciseId||'';
+ const items=filteredBank($('#coachExerciseSearch')?.value||'');
+ const grouped=new Map();
+ items.forEach(ex=>{
+  const chapter=topicMap.get(String(ex.topic))?.chapter||topicMap.get(String(ex.topic))?.category||'Autres exercices';
+  if(!grouped.has(chapter))grouped.set(chapter,[]);
+  grouped.get(chapter).push(ex);
+ });
  select.replaceChildren();
- const order={Avancé:0,Intermédiaire:1,Facile:2};
- bank.sort((a,b)=>(order[a.difficulty]??9)-(order[b.difficulty]??9));
- bank.forEach((ex,i)=>{
-  const t=topicFor(ex),option=document.createElement('option');
-  option.value=String(ex.id);
-  const label=(t?.title||'Exercice')+' · '+(ex.difficulty||'')+' · '+String(ex.question||'').replace(/\s+/g,' ').slice(0,92);
-  option.textContent=label;
-  select.append(option);
+ if(!items.length){const o=document.createElement('option');o.textContent='Aucun exercice trouvé';o.value='';select.append(o);selected=null;$('#coachPrompt').textContent='Modifie ta recherche pour afficher les exercices.';return}
+ grouped.forEach((group,chapter)=>{
+  const optgroup=document.createElement('optgroup');optgroup.label=chapter;
+  const counters={};
+  group.forEach(ex=>{
+   const option=document.createElement('option');option.value=String(ex.id);
+   const difficulty=ex.difficulty||'Exercice';counters[difficulty]=(counters[difficulty]||0)+1;
+   option.textContent=difficulty+' · Exercice '+counters[difficulty];
+   optgroup.append(option);
+  });
+  select.append(optgroup);
  });
- const wanted=bank.find(x=>String(x.id)===String(saved.selectedId))||bank.find(x=>x.difficulty==='Avancé')||bank[0];
- if(wanted){select.value=String(wanted.id);selected=wanted;showExercise()}
- $('#coachWork').value=saved.coachWork||'';
- $('#copyText').value=saved.copyText||'';
+ const choice=items.find(x=>String(x.id)===old)||items.find(x=>x.difficulty==='Avancé')||items[0];
+ select.value=String(choice.id);loadExercise();
 }
-function showExercise(){
- selected=bank.find(x=>String(x.id)===$('#coachExercise').value)||bank[0];
- if(!selected)return;
- const prompt=$('#coachPrompt');prompt.textContent=selected.question||'Énoncé indisponible.';typeset(prompt);
- $('#coachHintContent').hidden=true;$('#coachHintContent').textContent='';
- $('#coachFeedback').innerHTML='<span class="muted">Prends le temps de rédiger une tentative avant de demander un retour.</span>';
- save();
+function loadExercise(){
+ selected=bank.find(x=>String(x.id)===$('#coachExercise')?.value)||null;
+ const prompt=$('#coachPrompt');if(!selected){prompt.textContent='Choisis un exercice.';return}
+ prompt.textContent=selected.question||'Énoncé indisponible.';
+ history=String(previous.exerciseId)===String(selected.id)&&Array.isArray(previous.history)?previous.history.filter(m=>m&&['user','assistant'].includes(m.role)&&typeof m.text==='string').slice(-14):[];
+ renderChat();persist();typeset(prompt);
 }
-function analyzeStructure(value,target){
- const text=String(value||'').trim();
- if(text.length<20){
-  target.innerHTML='<strong class="check-warn">Rédaction trop courte pour une relecture.</strong><p>Écris au moins quelques étapes : les hypothèses, ton idée et la conclusion visée.</p>';
-  return;
- }
- const lower=text.toLocaleLowerCase('fr');
- const tests=[
-  {label:'Hypothèses ou données de départ explicitement repérées',ok:/\b(soit|supposons|suppose|hypothèse|on sait|comme|puisque|étant donné|pour tout|pour toute|on considère)\b/.test(lower),advice:'Énonce précisément ce que tu sais au départ et les conditions d’application des théorèmes.'},
-  {label:'Enchaînement logique visible',ok:/\b(donc|ainsi|par conséquent|car|or|puisque|en effet|il vient|on obtient|d'où|ce qui implique|entraîne|implique|en déduire)\b/.test(lower)||/⇒|\bsi\b.*\balors\b/i.test(text),advice:'Fais apparaître les liens entre les lignes : pourquoi cette égalité ou cette implication est-elle vraie ?'},
-  {label:'Conclusion formulée',ok:/\b(on conclut|conclusion|ainsi|donc|par conséquent|on a montré|ce qui prouve|il suffit|d'où)\b/.test(lower),advice:'Termine par une phrase qui répond explicitement à la question posée.'},
-  {label:'Éléments mathématiques présents',ok:/[=<>≤≥∈∀∃∑∫√]|\\(frac|lim|mathbb|begin|sum)|[a-zA-Z]\s*\(/.test(text),advice:'Vérifie que les objets et relations mathématiques utilisés sont écrits sans ambiguïté.'}
- ];
- const okCount=tests.filter(t=>t.ok).length;
- const rows=tests.map(t=>'<li class="'+(t.ok?'check-ok':'check-warn')+'">'+(t.ok?'✓ ':'○ ')+escapeHtml(t.label)+(t.ok?'':'<br><span>'+escapeHtml(t.advice)+'</span>')+'</li>').join('');
- target.innerHTML='<strong>Relecture de structure — '+okCount+'/'+tests.length+' repères détectés</strong><ul>'+rows+'</ul><p><strong>Important :</strong> ces repères sont détectés dans le texte. Ils ne prouvent ni la validité des calculs, ni la vérité des implications, ni l’application correcte d’un théorème. Relis chaque étape mathématiquement.</p>';
+function renderMessage(text,role){
+ const div=document.createElement('div');div.className='coach-message '+role;
+ const label=document.createElement('span');label.className='message-role';label.textContent=role==='user'?'TA DÉMARCHE':'TUTEUR MATHS4';
+ const body=document.createElement('div');
+ body.innerHTML=esc(text).replace(/\*\*([\s\S]+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+ div.append(label,body);return div;
 }
-$('#coachExercise')?.addEventListener('change',showExercise);
-$('#coachWork')?.addEventListener('input',save);
-$('#copyText')?.addEventListener('input',save);
-$('#coachAnalyse')?.addEventListener('click',()=>analyzeStructure($('#coachWork').value,$('#coachFeedback')));
-$('#coachClear')?.addEventListener('click',()=>{$('#coachWork').value='';$('#coachFeedback').innerHTML='<span class="muted">Brouillon effacé. Repars de la définition et des hypothèses.</span>';save()});
-$('#coachHint1')?.addEventListener('click',()=>{
- const box=$('#coachHintContent');box.hidden=false;
- box.textContent='Indice léger : reformule la conclusion demandée. Quelles sont les hypothèses disponibles ? Quel théorème ou quelle définition relie les deux ?';
-});
-$('#coachHint2')?.addEventListener('click',()=>{
- const box=$('#coachHintContent');box.hidden=false;
- box.textContent=selected?.hint||'Aucun indice ciblé n’est enregistré pour cet exercice.';
-});
-$('#coachSolution')?.addEventListener('click',()=>{
- const box=$('#coachHintContent');box.hidden=false;
- box.textContent=selected?.answer||'Aucune correction détaillée n’est disponible pour cet exercice.';
- typeset(box);
-});
-function resetImage(){
- imageFile=null;$('#copyImage').value='';$('#copyPreviewWrap').hidden=true;$('#copyPreview').removeAttribute('src');$('#runOcr').disabled=true;$('#ocrStatus').textContent='Aucune image sélectionnée.';
+function renderChat(){
+ const host=$('#coachChat');if(!host)return;host.replaceChildren();
+ if(!history.length){const welcome=document.createElement('div');welcome.className='coach-welcome';welcome.innerHTML='<strong>Commençons par ton idée.</strong><p>Écris ta première étape, même si elle est incomplète. Je t’aiderai à repérer ce qui est juste, ce qui manque et la prochaine question à te poser.</p>';host.append(welcome);}
+ history.forEach(m=>host.append(renderMessage(m.text,m.role)));
+ host.scrollTop=host.scrollHeight;typeset(host);
 }
-$('#copyImage')?.addEventListener('change',e=>{
- const file=e.target.files?.[0];if(!file)return;
- if(!file.type.startsWith('image/')){ $('#ocrStatus').textContent='Choisis un fichier image.';return; }
- if(file.size>12*1024*1024){$('#ocrStatus').textContent='Image trop volumineuse (maximum 12 Mo).';e.target.value='';return;}
- imageFile=file;const reader=new FileReader();
- reader.onload=()=>{$('#copyPreview').src=reader.result;$('#copyPreviewWrap').hidden=false;$('#runOcr').disabled=false;$('#ocrStatus').textContent='Photo chargée. Tu peux lancer la transcription expérimentale.'};
- reader.onerror=()=>{$('#ocrStatus').textContent='Impossible de lire cette image.'};
- reader.readAsDataURL(file);
-});
-$('#removeCopy')?.addEventListener('click',resetImage);
-async function loadOcr(){
- if(window.Tesseract)return window.Tesseract;
- await new Promise((resolve,reject)=>{
-  const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';script.onload=resolve;script.onerror=()=>reject(new Error('Chargement du moteur OCR impossible.'));document.head.append(script);
- });
- if(!window.Tesseract)throw new Error('Le moteur OCR ne s’est pas initialisé.');
- return window.Tesseract;
-}
-$('#runOcr')?.addEventListener('click',async()=>{
- if(!imageFile||ocrBusy)return;
- ocrBusy=true;$('#runOcr').disabled=true;$('#ocrStatus').textContent='Chargement du moteur de reconnaissance…';
+function addMessage(role,text){history.push({role,text});history=history.slice(-14);renderChat();persist()}
+function lock(value){busy=value;['#coachSend','#coachHint1','#coachReview','#copyAnalyse'].forEach(s=>{const b=$(s);if(b)b.disabled=value||(s==='#copyAnalyse'&&!photo)});if(value)setStatus('#coachStatus','Le tuteur réfléchit à ta démarche…')}
+async function callAI(mode,{text='',image=null,target='#coachStatus'}={}){
+ if(busy)return null;
+ if(!endpoint()){setStatus(target,'Serveur IA non configuré : déploie le Worker sécurisé puis renseigne son URL dans ai-config.js. Ne place jamais de clé API dans le site public.');return null}
+ if(!selected&&mode!=='proof_review'){setStatus(target,'Choisis d’abord un exercice.');return null}
+ lock(true);
  try{
-  const T=await loadOcr();
-  const result=await T.recognize(imageFile,'fra',{logger:m=>{if(m.status==='recognizing text')$('#ocrStatus').textContent='Transcription… '+Math.round((m.progress||0)*100)+' %';}});
-  $('#copyText').value=(result.data?.text||'').trim();save();
-  $('#ocrStatus').textContent='Transcription terminée. Corrige les symboles et les formules à la main : l’OCR est imparfait en mathématiques.';
-  if(!$('#copyText').value)$('#ocrStatus').textContent='Aucun texte reconnu. Essaie une photo plus nette ou saisis le texte manuellement.';
- }catch(error){$('#ocrStatus').textContent=error.message||'Erreur pendant la transcription.'}
- finally{ocrBusy=false;$('#runOcr').disabled=!imageFile}
+  const payload={mode,exercise:selected?{title:exerciseTitle(selected),question:selected.question||'',hint:selected.hint||'',reference_solution:selected.answer||''}:null,messages:history.slice(-12),text:String(text||'').slice(0,12000),image};
+  const response=await fetch(endpoint(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Le serveur IA a refusé la demande ('+response.status+').');
+  if(!data.reply)throw new Error('Le serveur a répondu sans contenu exploitable.');
+  setStatus(target,'Analyse terminée.');return String(data.reply);
+ }catch(error){setStatus(target,error.message||'Impossible de joindre le tuteur IA.');return null}
+ finally{lock(false)}
+}
+async function sendTutor(mode='tutor'){
+ const input=$('#coachWork'),text=input.value.trim();
+ if(mode==='tutor'&&!text){setStatus('#coachStatus','Écris une première étape ou une question avant d’envoyer.');input.focus();return}
+ const prompt=mode==='hint'?'Donne-moi uniquement le prochain indice utile, sans révéler la solution.':mode==='review'?'Analyse rigoureusement ma démarche actuelle : indique les étapes correctes, le premier point non justifié ou faux, et pose une question pour m’aider à continuer.':'';
+ const outgoing=text||prompt;addMessage('user',outgoing);input.value='';persist();
+ const reply=await callAI(mode,{text:outgoing});if(reply)addMessage('assistant',reply);
+}
+$('#coachExerciseSearch')?.addEventListener('input',renderOptions);
+$('#coachExercise')?.addEventListener('change',()=>{loadExercise();setStatus('#coachStatus','Nouvel exercice sélectionné.');});
+$('#coachSend')?.addEventListener('click',()=>sendTutor('tutor'));
+$('#coachWork')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendTutor('tutor')}});
+$('#coachHint1')?.addEventListener('click',()=>sendTutor('hint'));
+$('#coachReview')?.addEventListener('click',()=>sendTutor('review'));
+$('#coachReset')?.addEventListener('click',()=>{history=[];renderChat();persist();setStatus('#coachStatus','Séance réinitialisée.')});
+function clearPhoto(){photo=null;$('#copyImage').value='';$('#copyPreview').removeAttribute('src');$('#copyPreviewWrap').hidden=true;$('#copyAnalyse').disabled=true}
+async function resizeImage(file){
+ const url=URL.createObjectURL(file);
+ try{
+  const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=url});
+  const scale=Math.min(1,1800/Math.max(img.width,img.height));
+  const canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+  canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+  return canvas.toDataURL('image/jpeg',.82);
+ }finally{URL.revokeObjectURL(url)}
+}
+$('#copyImage')?.addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)){setStatus('#copyStatus','Format non pris en charge. Choisis JPG, PNG ou WebP.');return}
+ if(file.size>8*1024*1024){setStatus('#copyStatus','Image trop volumineuse : maximum 8 Mo.');e.target.value='';return}
+ try{photo=await resizeImage(file);$('#copyPreview').src=photo;$('#copyPreviewWrap').hidden=false;$('#copyAnalyse').disabled=false;setStatus('#copyStatus','Photo prête. Elle sera analysée par le modèle de vision après connexion du serveur IA.')}
+ catch{setStatus('#copyStatus','Impossible de lire cette photo. Essaie une autre image.')}
 });
-$('#copyAnalyse')?.addEventListener('click',()=>analyzeStructure($('#copyText').value,$('#copyFeedback')));
-initExercises();
+$('#removeCopy')?.addEventListener('click',clearPhoto);
+$('#copyText')?.addEventListener('input',persist);
+$('#copyAnalyse')?.addEventListener('click',async()=>{
+ if(!photo){setStatus('#copyStatus','Ajoute une photo de ta démonstration.');return}
+ const context=$('#copyText').value.trim();setStatus('#copyFeedback','Analyse de la copie en cours…');
+ const reply=await callAI('proof_review',{text:context,image:photo,target:'#copyStatus'});
+ if(reply){$('#copyFeedback').textContent=reply;typeset($('#copyFeedback'))}
+ else if(endpoint())$('#copyFeedback').textContent='La relecture n’a pas abouti. Consulte le message de connexion ci-dessus.';
+});
+renderOptions();
+if(!endpoint()){setStatus('#coachStatus','Serveur IA non configuré : le tuteur attend son endpoint sécurisé. Le site statique ne contient aucune clé secrète.');setStatus('#copyStatus','Serveur IA non configuré : la photo peut être préparée, mais son analyse nécessite le Worker.')}
 })();
