@@ -47,34 +47,39 @@
  </div>
 </section>
 <section class="view" id="atelier">
- <div class="intro"><span class="eyebrow">ATELIER DE RAISONNEMENT</span><h1>Apprendre à démontrer.</h1><p>Travaille ta rédaction, demande des indices sans dévoiler la solution et relis la structure de tes preuves.</p></div>
- <div class="atelier-notice"><strong>À savoir</strong><span>L'atelier local vérifie la structure de ta rédaction, pas la validité mathématique de chaque étape. L'analyse IA approfondie et la correction sémantique des photos nécessiteront le serveur sécurisé de Maths4.</span></div>
- <div class="atelier-grid">
+ <div class="intro"><span class="eyebrow">ATELIER DE RAISONNEMENT</span><h1>Apprendre à démontrer.</h1><p>Un tuteur qui te guide sans faire le travail à ta place, et un regard critique sur tes démonstrations manuscrites.</p></div>
+ <div class="atelier-grid atelier-grid-ai">
   <article class="panel atelier-panel">
-   <div class="atelier-kicker">01 · TUTEUR GUIDÉ</div><h2>Construis ton raisonnement.</h2>
-   <label class="atelier-label" for="coachExercise">Choisir un exercice</label><select id="coachExercise" class="atelier-select"><option>Chargement des exercices…</option></select>
-   <div class="atelier-question"><span class="eyebrow">ÉNONCÉ</span><p id="coachPrompt">Sélectionne un exercice pour commencer.</p></div>
-   <label class="atelier-label" for="coachWork">Ta tentative de démonstration</label><textarea id="coachWork" rows="8" placeholder="Écris ton raisonnement étape par étape. Même incomplet, il servira de point de départ…"></textarea>
-   <div class="atelier-actions"><button class="primary" id="coachAnalyse">Relire ma rédaction</button><button class="secondary" id="coachClear">Effacer</button></div>
-   <div id="coachFeedback" class="atelier-feedback" aria-live="polite"><span class="muted">Ton retour apparaîtra ici, sans note artificielle.</span></div>
-   <div class="atelier-hints"><span class="atelier-label">Débloquer progressivement</span><div class="atelier-actions"><button class="secondary" id="coachHint1">Indice léger</button><button class="secondary" id="coachHint2">Indice ciblé</button><button class="secondary" id="coachSolution">Voir la correction</button></div><div id="coachHintContent" class="atelier-feedback" hidden></div></div>
+   <div class="atelier-kicker">01 · TUTEUR MATHÉMATIQUE</div><h2>Ton entraînement, avec un vrai dialogue.</h2>
+   <label class="atelier-label" for="coachExerciseSearch">Rechercher un exercice</label>
+   <input id="coachExerciseSearch" class="atelier-search" type="search" placeholder="Chapitre, notion, difficulté…">
+   <label class="atelier-label" for="coachExercise">Exercices disponibles</label>
+   <select id="coachExercise" class="atelier-select" size="1"><option>Chargement des exercices…</option></select>
+   <div class="atelier-question"><span class="eyebrow">ÉNONCÉ</span><p id="coachPrompt">Choisis un exercice pour commencer.</p></div>
+   <div class="coach-chat" id="coachChat" aria-live="polite"><div class="coach-welcome"><strong>Commençons par ton idée.</strong><p>Écris ta première étape, même si elle est incomplète. Je t'aiderai à repérer ce qui est juste, ce qui manque et la prochaine question à te poser.</p></div></div>
+   <label class="atelier-label" for="coachWork">Ta réponse</label>
+   <textarea id="coachWork" rows="4" placeholder="Explique ton raisonnement étape par étape…"></textarea>
+   <div class="atelier-actions coach-actions"><button class="primary" id="coachSend">Envoyer ma démarche</button><button class="secondary" id="coachHint1">Indice progressif</button><button class="secondary" id="coachReview">Analyser ma preuve</button></div>
+   <div class="atelier-footnote" id="coachStatus" aria-live="polite">Le tuteur IA se connectera dès que le serveur sécurisé sera configuré.</div>
+   <button class="text-button" id="coachReset">Réinitialiser cette séance</button>
   </article>
   <article class="panel atelier-panel">
-   <div class="atelier-kicker">02 · COPIE MANUSCRITE</div><h2>Relis une démonstration écrite.</h2>
-   <p class="muted">Importe une photo nette de ta copie. L'OCR expérimental tente d'en extraire le texte ; vérifie et corrige impérativement les formules avant la relecture.</p>
-   <label class="upload-zone" for="copyImage"><span class="upload-symbol">＋</span><strong>Importer une photo</strong><small>JPG, PNG ou WebP · 12 Mo maximum</small><input id="copyImage" type="file" accept="image/*" capture="environment"></label>
-   <div id="copyPreviewWrap" class="copy-preview" hidden><img id="copyPreview" alt="Aperçu de la copie manuscrite"><button class="secondary" id="removeCopy">Retirer la photo</button></div>
-   <div class="atelier-actions"><button class="secondary" id="runOcr" disabled>Transcrire le texte (OCR)</button><span id="ocrStatus" class="muted" aria-live="polite">Aucune image sélectionnée.</span></div>
-   <label class="atelier-label" for="copyText">Transcription à relire</label><textarea id="copyText" rows="9" placeholder="Le texte reconnu apparaîtra ici. Tu peux aussi le saisir ou le corriger manuellement…"></textarea>
-   <button class="primary" id="copyAnalyse">Analyser la structure de la preuve</button>
-   <div id="copyFeedback" class="atelier-feedback" aria-live="polite"><span class="muted">La relecture portera sur la structure et la rédaction, pas sur la justesse des calculs.</span></div>
+   <div class="atelier-kicker">02 · CORRECTEUR DE DÉMONSTRATIONS</div><h2>Fais relire ta copie.</h2>
+   <p class="muted">Photographie une démonstration entière et lisible. Le correcteur IA examinera les étapes, les implications, les hypothèses et la rédaction, puis proposera une correction ciblée.</p>
+   <label class="upload-zone" for="copyImage"><span class="upload-symbol">＋</span><strong>Photographier ou importer une copie</strong><small>JPG, PNG ou WebP · 8 Mo maximum</small><input id="copyImage" type="file" accept="image/jpeg,image/png,image/webp" capture="environment"></label>
+   <div id="copyPreviewWrap" class="copy-preview" hidden><img id="copyPreview" alt="Aperçu de la démonstration manuscrite"><button class="secondary" id="removeCopy">Retirer la photo</button></div>
+   <label class="atelier-label" for="copyText">Contexte ou transcription (facultatif)</label>
+   <textarea id="copyText" rows="5" placeholder="Tu peux préciser l'énoncé, le chapitre ou recopier les passages difficiles à lire…"></textarea>
+   <button class="primary" id="copyAnalyse" disabled>Analyser ma démonstration</button>
+   <div id="copyFeedback" class="atelier-feedback" aria-live="polite"><span class="muted">Le retour détaillera les points solides, les erreurs possibles et les étapes à reprendre.</span></div>
+   <div class="atelier-footnote" id="copyStatus">La photo sera envoyée au serveur IA sécurisé uniquement lorsque tu lanceras l'analyse.</div>
   </article>
  </div>
- <div class="atelier-footer"><span>TES BROUILLONS RESTENT SUR CET APPAREIL</span><span>Maths4 · Atelier expérimental</span></div>
+ <div class="atelier-footer"><span>TES BROUILLONS RESTENT SUR CET APPAREIL</span><span>Maths4 · Tuteur & démonstrations</span></div>
 </section>
 <section class="view" id="reference"><div class="intro"><span class="eyebrow">BOÎTE À OUTILS</span><h1>Référentiel mathématique.</h1><p>Définitions et théorèmes essentiels à retrouver rapidement.</p></div><input id="refSearch" class="search-wide" placeholder="Rechercher une définition ou un théorème…"><div id="refs" class="ref-list"></div></section>
 <section class="view" id="progress"><div class="intro"><span class="eyebrow">RÉGULARITÉ & MAÎTRISE</span><h1>Ta progression.</h1><p>Construis des connaissances durables, sans chercher à aller vite.</p></div><div class="progress-grid"><article class="panel"><small>NOTIONS MAÎTRISÉES</small><div class="progress-number"><strong id="percent">0%</strong><span id="progressCount">0 notion sur 18</span></div><div class="bar big"><i id="progressBar"></i></div><p class="muted">Marque une notion comme maîtrisée après avoir su l'expliquer et résoudre un exercice sans aide.</p></article><article class="panel"><small>SÉANCES ENREGISTRÉES</small><strong class="big-number" id="sessions">0</strong><button class="secondary" id="addSession">+ Enregistrer une séance</button></article></div><div class="section-title"><h2>Révisions espacées</h2></div><div id="reviewSummary" class="review-summary"></div><div class="section-title"><h2>Suivi par notion</h2></div><div id="progressList" class="ref-list"></div><button id="reset" class="reset">Réinitialiser la progression locale</button></section>
-<footer>∑ MATHS2 <span>Comprendre · Démontrer · Maîtriser</span></footer></main><script>window.MathJax={tex:{inlineMath:[["\\(","\\)"],["$","$"]],displayMath:[["\\[","\\]"]],processEscapes:true},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]},startup:{typeset:false}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" onload="MathJax.typesetPromise().catch(function(e){console.error('MathJax',e)})"></script><script src="data.js?v=20261118-derivative1"></script><script src="app.js?v=20261118-refmath2"></script><script src="atelier.js?v=20261118-atelier1"></script>
+<footer>∑ MATHS2 <span>Comprendre · Démontrer · Maîtriser</span></footer></main><script>window.MathJax={tex:{inlineMath:[["\\(","\\)"],["$","$"]],displayMath:[["\\[","\\]"]],processEscapes:true},options:{skipHtmlTags:["script","noscript","style","textarea","pre","code"]},startup:{typeset:false}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" onload="MathJax.typesetPromise().catch(function(e){console.error('MathJax',e)})"></script><script src="data.js?v=20261118-derivative1"></script><script src="app.js?v=20261118-refmath2"></script><script src="ai-config.js?v=20261118-ai1"></script><script src="atelier.js?v=20261118-ai1"></script>
 <script>
 /* Navigation de secours : le cours reste accessible même si un autre module JS échoue. */
 (()=>{
