@@ -24,15 +24,15 @@ window.openMaths4Course=openCourseFromExercise;
 function exerciseMathHtml(value){
  const raw=String(value??'');
  // Les expressions LaTeX déjà balisées ne sont jamais reconverties.
- if(raw.includes('$')||raw.includes('\\\\(')||raw.includes('\\\\[')){
+ if(raw.includes('$')||raw.includes('\\(')||raw.includes('\\[')){
   // Les corrections mélangent du Markdown léger (**gras**) et du LaTeX.
   const bold=[];
-  let safe=raw.replace(/\\*\\*([\\s\\S]+?)\\*\\*/g,(_,content)=>{
+  let safe=raw.replace(/\*\*([\s\S]+?)\*\*/g,(_,content)=>{
    const token='@@MATHSBOLD'+bold.length+'@@';
    bold.push('<strong>'+content.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</strong>');
    return token;
   });
-  safe=safe.split('\\n').map(line=>line.replace(/</g,'&lt;').replace(/>/g,'&gt;')).join('<br>');
+  safe=safe.split('\n').map(line=>line.replace(/</g,'&lt;').replace(/>/g,'&gt;')).join('<br>');
   bold.forEach((html,i)=>{safe=safe.replace('@@MATHSBOLD'+i+'@@',html)});
   return safe;
  }
