@@ -169,3 +169,36 @@ mjx-container{max-width:100%!important}
   .flash-scene{height:clamp(300px,95vw,390px)}
   .flash-face{padding:clamp(14px,4vw,22px)}
 }
+
+
+/* Atelier de raisonnement : modules guidés et relecture locale */
+.atelier-notice{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;margin:18px 0 22px;border:1px solid #725d37;background:#292719;border-radius:13px;color:#e9d9ad;font-size:13px;line-height:1.6}
+.atelier-notice strong{white-space:nowrap;color:#f2d28c}
+.atelier-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+.atelier-panel{padding:clamp(16px,2.5vw,24px);min-width:0}
+.atelier-kicker{font:700 10px 'DM Mono',monospace;letter-spacing:1.4px;color:#91bce9;margin-bottom:10px}
+.atelier-panel h2{font-size:21px;margin:0 0 16px}
+.atelier-label{display:block;font-size:12px;font-weight:800;color:#c2d4e8;margin:16px 0 8px}
+.atelier-select,.atelier-panel textarea{display:block;width:100%;max-width:100%;box-sizing:border-box;background:#111e2d;color:#edf3fa;border:1px solid #3b536d;border-radius:11px;padding:12px;font:inherit}
+.atelier-panel textarea{resize:vertical;line-height:1.65;min-height:130px}
+.atelier-panel textarea:focus,.atelier-select:focus{outline:2px solid #83b5ec;outline-offset:2px}
+.atelier-question{padding:15px;margin-top:14px;border-radius:12px;background:#122238;border:1px solid #304a67;line-height:1.7}
+.atelier-question p{white-space:pre-wrap;margin:8px 0 0}
+.atelier-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.atelier-feedback{margin-top:13px;padding:13px;border-radius:11px;border:1px solid #30465f;background:#111e2d;color:#dce8f8;line-height:1.65;font-size:13px}
+.atelier-feedback ul{padding-left:20px;margin:8px 0}
+.atelier-feedback li{margin:6px 0}
+.atelier-feedback .check-ok{color:#8ed6b7}
+.atelier-feedback .check-warn{color:#e9c57d}
+.atelier-hints{margin-top:20px;padding-top:16px;border-top:1px solid #30465f}
+.upload-zone{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:150px;padding:16px;border:1px dashed #6484a8;border-radius:14px;background:#132338;text-align:center;cursor:pointer;color:#e8f1fb}
+.upload-zone:hover{border-color:#a6cfff;background:#172b43}
+.upload-zone small{font-size:11px;color:#9aadc1}
+.upload-symbol{font-size:30px;color:#a9cfff}
+.upload-zone input{position:absolute;width:1px;height:1px;opacity:0}
+.copy-preview{margin-top:12px;padding:10px;background:#101b29;border:1px solid #30465f;border-radius:12px}
+.copy-preview img{display:block;max-width:100%;max-height:360px;object-fit:contain;margin:0 auto 10px;border-radius:8px}
+.atelier-footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:20px 0;color:#8298b2;font:9px 'DM Mono',monospace;letter-spacing:1px}
+.atelier-panel button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:900px){.atelier-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:520px){.atelier-notice{display:block}.atelier-notice strong{display:block;margin-bottom:4px}.atelier-actions>*{max-width:100%}.atelier-panel h2{font-size:19px}}
