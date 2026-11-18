@@ -3,22 +3,24 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const endpoint=()=>String(window.MATHS4_AI_ENDPOINT||'').trim();
 const storeKey='maths4_ai_workshop_v2';
+const topics=typeof TOPICS!=='undefined'&&Array.isArray(TOPICS)?TOPICS:[];
+const exercises=typeof EXERCISES!=='undefined'&&Array.isArray(EXERCISES)?EXERCISES:[];
 const previous=(()=>{try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch{return {}}})();
 let selected=null,photo=null,busy=false,history=[];
 const persist=()=>{try{localStorage.setItem(storeKey,JSON.stringify({exerciseId:$('#coachExercise')?.value||'',history:history.slice(-14),copyText:$('#copyText')?.value||''}))}catch{}};
 const setStatus=(id,message)=>{const el=$(id);if(el)el.textContent=message};
 const typeset=el=>{if(window.MathJax?.typesetPromise)window.MathJax.typesetPromise([el]).catch(()=>{})};
 function exerciseBank(){
- const all=Array.isArray(window.EXERCISES)?window.EXERCISES:[];
+ const all=exercises;
  const items=all.map(x=>({...x}));
  const seen=new Set(items.map(x=>String(x.topic)));
- (Array.isArray(window.TOPICS)?window.TOPICS:[]).forEach(t=>{
+ topics.forEach(t=>{
   if(t.exercise&&!seen.has(String(t.id)))items.push({id:'topic-'+t.id,topic:t.id,difficulty:'Facile',question:t.exercise,hint:t.hint||'',answer:t.answer||''});
  });
  return items;
 }
 const bank=exerciseBank();
-const topicMap=new Map((window.TOPICS||[]).map(t=>[String(t.id),t]));
+const topicMap=new Map(topics.map(t=>[String(t.id),t]));
 function exerciseTitle(ex){return topicMap.get(String(ex.topic))?.title||ex.chapter||'Exercice'}
 function filteredBank(q=''){
  const query=q.trim().toLocaleLowerCase('fr');
@@ -26,7 +28,7 @@ function filteredBank(q=''){
   const t=topicMap.get(String(ex.topic));
   return !query||(exerciseTitle(ex)+' '+(t?.category||'')+' '+(ex.difficulty||'')+' '+(ex.question||'')).toLocaleLowerCase('fr').includes(query);
  }).sort((a,b)=>{
-  const ia=(window.TOPICS||[]).findIndex(t=>String(t.id)===String(a.topic));
+  const ia=topics.findIndex(t=>String(t.id)===String(a.topic));
   const ib=(window.TOPICS||[]).findIndex(t=>String(t.id)===String(b.topic));
   const rank={Facile:0,'Intermédiaire':1,Avancé:2};
   return ia-ib||(rank[a.difficulty]??9)-(rank[b.difficulty]??9);
