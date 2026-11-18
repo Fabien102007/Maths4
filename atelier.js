@@ -52,7 +52,7 @@ function renderOptions(){
   group.forEach(ex=>{
    const option=document.createElement('option');option.value=String(ex.id);
    const difficulty=ex.difficulty||'Exercice';counters[difficulty]=(counters[difficulty]||0)+1;
-   option.textContent=difficulty+' · Exercice '+counters[difficulty];
+   option.textContent=exerciseTitle(ex)+' — '+difficulty+(counters[difficulty]>1?' · '+counters[difficulty]:'');
    optgroup.append(option);
   });
   select.append(optgroup);
