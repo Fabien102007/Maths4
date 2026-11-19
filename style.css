@@ -343,3 +343,36 @@ mjx-container{max-width:100%!important}
   #coachChat .coach-message{max-width:94%!important;padding:13px 14px!important;font-size:13px!important}
 }
 @media(prefers-reduced-motion:reduce){#coachChat .coach-message{animation:none!important}}
+
+
+/* PHASE 1 — parcours quotidien : apprentissage guidé et progression lisible */
+.daily-learning{position:relative;overflow:hidden;margin:28px 0 34px;padding:clamp(20px,3vw,30px);border:1px solid rgba(119,163,210,.2);background:linear-gradient(135deg,rgba(22,39,60,.96),rgba(15,25,40,.98));box-shadow:0 18px 48px rgba(0,0,0,.18)}
+.daily-learning:before{content:"";position:absolute;width:320px;height:320px;right:-150px;top:-190px;border-radius:50%;background:radial-gradient(circle,rgba(90,130,220,.18),transparent 68%);pointer-events:none}
+.daily-top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:22px;position:relative}
+.daily-top h2{font-size:clamp(21px,2.5vw,29px);margin:7px 0}
+.daily-top p{color:#aebed1;margin:0;max-width:560px;line-height:1.65}
+.daily-date{font-size:11px;color:#a9bbd0;border:1px solid #344b66;background:#15283d;padding:8px 11px;border-radius:999px;white-space:nowrap}
+.daily-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;position:relative}
+.daily-focus,.daily-check{border:1px solid rgba(139,169,204,.16);border-radius:17px;padding:20px;background:rgba(8,18,31,.45)}
+.daily-focus{background:linear-gradient(145deg,rgba(37,70,105,.55),rgba(17,34,53,.75))}
+.daily-step{font:800 9px 'DM Mono',monospace;letter-spacing:1.4px;color:#82b9e9}
+.daily-topic-meta{display:flex;gap:7px;margin-top:17px}
+.daily-topic-meta span{font-size:10px;color:#b9cce0;padding:4px 8px;border-radius:999px;background:#ffffff0c;border:1px solid #ffffff16}
+.daily-focus h3{font-size:23px;margin:10px 0 6px;color:#f1f6fc}
+.daily-focus p{font-size:13px;line-height:1.65;color:#afc0d2;min-height:42px}
+.daily-focus button{margin-top:12px}
+.daily-check h3{font-size:17px;margin:15px 0 12px}
+.daily-check ul{padding-left:18px;margin:0 0 17px;color:#bdcad9;font-size:12px;line-height:1.85}
+.daily-check li{padding-left:3px;margin:5px 0}
+.daily-check button{width:100%}
+.daily-check button:disabled{opacity:.75;cursor:default}
+.daily-check small{display:block;color:#8fa3b9;font-size:10px;line-height:1.5;margin-top:9px}
+.daily-bottom{display:grid;grid-template-columns:auto minmax(70px,1fr) auto;align-items:center;gap:16px;margin-top:20px;padding-top:17px;border-top:1px solid #ffffff12}
+.daily-bottom>div:first-child{display:flex;align-items:baseline;gap:8px}
+.daily-bottom strong{font-size:16px;color:#e9f2ff}
+.daily-bottom span{font-size:10px;color:#91a5bd}
+.daily-track{height:6px;border-radius:20px;background:#ffffff12;overflow:hidden}
+.daily-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#56c4ae,#7da9ef);transition:width .5s ease}
+.daily-bottom .text-button{font-size:11px;white-space:nowrap}
+.daily-loading{color:#9fb2c8;font-size:13px;padding:18px}
+@media(max-width:700px){.daily-grid{grid-template-columns:1fr}.daily-top{display:block}.daily-date{display:inline-block;margin-top:12px}.daily-bottom{grid-template-columns:1fr auto;gap:10px}.daily-track{grid-column:1/-1;grid-row:2}.daily-bottom .text-button{justify-self:end}}
