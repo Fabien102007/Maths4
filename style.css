@@ -270,3 +270,6 @@ mjx-container{max-width:100%!important}
  .coach-upload{padding:11px;gap:10px}
 }
 @media(prefers-reduced-motion:reduce){.coach-message{animation:none}}
+
+/* Atelier photo-first : une seule zone de dialogue, sans doublon de correcteur */
+.atelier-grid-ai{grid-template-columns:minmax(0,1fr);max-width:980px;margin-inline:auto}
