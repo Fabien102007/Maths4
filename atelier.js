@@ -6,7 +6,7 @@ const storeKey='maths4_ai_workshop_v2';
 const topics=typeof TOPICS!=='undefined'&&Array.isArray(TOPICS)?TOPICS:[];
 const exercises=typeof EXERCISES!=='undefined'&&Array.isArray(EXERCISES)?EXERCISES:[];
 const previous=(()=>{try{return JSON.parse(localStorage.getItem(storeKey)||'{}')}catch{return {}}})();
-let selected=null,photo=null,busy=false,history=[];
+let selected=null,photo=null,tutorPhoto=null,busy=false,history=[];
 const persist=()=>{try{localStorage.setItem(storeKey,JSON.stringify({exerciseId:$('#coachExercise')?.value||'',history:history.slice(-14),copyText:$('#copyText')?.value||''}))}catch{}};
 const setStatus=(id,message)=>{const el=$(id);if(el)el.textContent=message};
 const typeset=el=>{if(window.MathJax?.typesetPromise)window.MathJax.typesetPromise([el]).catch(()=>{})};
@@ -76,7 +76,7 @@ function renderMessage(text,role){
 }
 function renderChat(){
  const host=$('#coachChat');if(!host)return;host.replaceChildren();
- if(!history.length){const welcome=document.createElement('div');welcome.className='coach-welcome';welcome.innerHTML='<strong>Commençons par ton idée.</strong><p>Écris ta première étape, même si elle est incomplète. Je t’aiderai à repérer ce qui est juste, ce qui manque et la prochaine question à te poser.</p>';host.append(welcome);}
+ if(!history.length){const welcome=document.createElement('div');welcome.className='coach-welcome';welcome.innerHTML='<strong>À toi de jouer.</strong><p>Travaille sur ta feuille, puis envoie une photo de ta démarche. Je t’aiderai à repérer ce qui est juste et à débloquer la suite.</p>';host.append(welcome);}
  history.forEach(m=>host.append(renderMessage(m.text,m.role)));
  host.scrollTop=host.scrollHeight;typeset(host);
 }
@@ -98,16 +98,45 @@ async function callAI(mode,{text='',image=null,target='#coachStatus'}={}){
  finally{lock(false)}
 }
 async function sendTutor(mode='tutor'){
- const input=$('#coachWork'),text=input.value.trim();
- if(mode==='tutor'&&!text){setStatus('#coachStatus','Écris une première étape ou une question avant d’envoyer.');input.focus();return}
+ const input=$('#coachQuestion'),text=input?.value.trim()||'';
+ if(mode==='tutor'&&!text&&!tutorPhoto){setStatus('#coachStatus','Ajoute une photo de ta démarche ou écris une courte question.');return}
  const prompt=mode==='hint'?'Donne-moi uniquement le prochain indice utile, sans révéler la solution.':mode==='review'?'Analyse rigoureusement ma démarche actuelle : indique les étapes correctes, le premier point non justifié ou faux, et pose une question pour m’aider à continuer.':'';
- const outgoing=text||prompt;addMessage('user',outgoing);input.value='';persist();
- const reply=await callAI(mode,{text:outgoing});if(reply)addMessage('assistant',reply);
+ const outgoing=text|| (tutorPhoto?'Voici ma démarche manuscrite.':prompt);
+ const imageToSend=tutorPhoto;
+ addMessage('user',outgoing);
+ if(imageToSend){const last=$('#coachChat')?.lastElementChild;if(last){const img=document.createElement('img');img.className='coach-message-photo';img.src=imageToSend;img.alt='Photo de ma démarche manuscrite';last.append(img);}}
+ if(input)input.value='';
+ tutorPhoto=null;$('#coachImage').value='';$('#coachPhotoPreview').removeAttribute('src');$('#coachPhotoPreviewWrap').hidden=true;
+ persist();
+ const context=imageToSend
+  ? 'Exercice sélectionné : '+(selected?.question||'')+'\\nQuestion complémentaire : '+text
+  : outgoing;
+ const reply=await callAI(imageToSend?'proof_review':mode,{text:context,image:imageToSend});
+ if(reply)addMessage('assistant',reply);
 }
 $('#coachExerciseSearch')?.addEventListener('input',renderOptions);
 $('#coachExercise')?.addEventListener('change',()=>{loadExercise();setStatus('#coachStatus','Nouvel exercice sélectionné.');});
 $('#coachSend')?.addEventListener('click',()=>sendTutor('tutor'));
-$('#coachWork')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendTutor('tutor')}});
+async function resizeImage(file){
+ const url=URL.createObjectURL(file);
+ try{
+  const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=url});
+  const scale=Math.min(1,1800/Math.max(img.width,img.height));
+  const canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+  canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+  return canvas.toDataURL('image/jpeg',.82);
+ }finally{URL.revokeObjectURL(url)}
+}
+$('#coachImage')?.addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)){setStatus('#coachStatus','Format non pris en charge. Choisis JPG, PNG ou WebP.');return}
+ if(file.size>8*1024*1024){setStatus('#coachStatus','Image trop volumineuse : maximum 8 Mo.');e.target.value='';return}
+ try{tutorPhoto=await resizeImage(file);$('#coachPhotoPreview').src=tutorPhoto;$('#coachPhotoPreviewWrap').hidden=false;setStatus('#coachStatus','Photo prête. Tu peux l’envoyer au tuteur.')}
+ catch{setStatus('#coachStatus','Impossible de lire cette photo. Essaie une autre image.')}
+});
+$('#removeCoachPhoto')?.addEventListener('click',()=>{tutorPhoto=null;$('#coachImage').value='';$('#coachPhotoPreview').removeAttribute('src');$('#coachPhotoPreviewWrap').hidden=true;setStatus('#coachStatus','Photo retirée.')});
+
+
 $('#coachHint1')?.addEventListener('click',()=>sendTutor('hint'));
 $('#coachReview')?.addEventListener('click',()=>sendTutor('review'));
 $('#coachReset')?.addEventListener('click',()=>{history=[];renderChat();persist();setStatus('#coachStatus','Séance réinitialisée.')});
